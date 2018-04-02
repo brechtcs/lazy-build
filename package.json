@@ -1,6 +1,9 @@
 {
   "name": "glob-the-builder",
   "version": "0.1.0",
+  "description": "Build files using glob targets and pull streams",
+  "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
+  "main": "index.js",
   "scripts": {
     "test": "standard && tape test"
   },
@@ -17,5 +20,22 @@
     "pull-group": "^1.0.1",
     "standard": "^10.0.3",
     "tape": "^4.8.0"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "build",
+    "globs",
+    "pull",
+    "streams"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brechtpm/glob-the-builder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brechtpm/glob-the-builder/issues"
+  },
+  "license": "Apache-2.0"
 }
