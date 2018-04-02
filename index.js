@@ -70,8 +70,12 @@ class Build {
     if (isMatch !== true) {
       assert.ok(match(pattern, target), target + ' does not match requested target ' + pattern)
     }
+    var source = this.targets[target](this.parse(pattern || target))
+    if (typeof source !== 'function') {
+      return this.scan(target, cb)
+    }
     pull(
-      this.targets[target](this.parse(pattern || target)),
+      source,
       pull.drain(file => {
         mkdir(path.dirname(file.path))
         fs.writeFile(file.path, file.contents, file.enc || file.encoding, cb)
