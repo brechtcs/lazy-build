@@ -1,0 +1,21 @@
+{
+  "name": "glob-the-builder",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "standard && tape test"
+  },
+  "dependencies": {
+    "minimatch": "^3.0.4",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "pull-glob": "^1.0.7",
+    "pull-stream": "^3.6.7",
+    "rimraf": "^2.6.2"
+  },
+  "devDependencies": {
+    "marked": "^0.3.19",
+    "pull-group": "^1.0.1",
+    "standard": "^10.0.3",
+    "tape": "^4.8.0"
+  }
+}
