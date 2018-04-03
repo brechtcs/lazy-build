@@ -70,8 +70,10 @@ class Build {
       assert.ok(match(pattern, target), target + ' does not match requested target ' + pattern)
     }
     var source = this.targets[target](this.parse(pattern || target))
-    if (typeof source !== 'function') {
-      return this.scan(target, cb)
+    if (typeof source.then === 'function') {
+      return source.then(() => {
+        this.scan(target, cb)
+      }).catch(cb)
     }
     pull(
       source,
