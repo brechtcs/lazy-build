@@ -2,7 +2,7 @@ var assert = require('assert')
 var fs = require('fs')
 var glob = require('pull-glob')
 var mkdir = require('mkdirp')
-var match = require('./match')
+var minimatch = require('minimatch')
 var minimist = require('minimist')
 var path = require('path')
 var pull = require('pull-stream')
@@ -67,7 +67,7 @@ class Build {
 
   fixit (pattern, target, cb, isMatch) {
     if (isMatch !== true) {
-      assert.ok(match(pattern, target), target + ' does not match requested target ' + pattern)
+      assert.ok(minimatch(pattern, target), target + ' does not match requested target ' + pattern)
     }
     var source = this.targets[target](this.parse(pattern || target))
     if (typeof source.then === 'function') {
@@ -95,9 +95,14 @@ class Build {
         this.fixit(pattern, pattern, cb, true)
       } else {
         for (var target in this.targets) {
-          if (target !== pattern && match(pattern, target)) {
+          if (target === pattern) continue
+          if (!pattern) {
+            this.fixit(target, target, cb, true)
+            continue
+          }
+          if (minimatch(pattern, target)) {
             this.fixit(pattern, target, cb, true)
-            if (pattern) break
+            break
           }
         }
       }
