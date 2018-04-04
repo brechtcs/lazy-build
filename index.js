@@ -37,31 +37,25 @@ class Build {
   }
 
   command (cb) {
-    var cmdOpts = {
-      boolean: ['all', 'a', 'clean', 'c']
-    }
     var done = function (err) {
       if (err) {
         if (cb) cb(err)
         else throw err
       }
     }
-    var opts = minimist(process.argv.slice(2), cmdOpts)
-    var patterns = opts._
-
-    if (opts.clean || opts.c) {
+    if (this.opts.clean || this.opts.c) {
       this.clean(this.files, err => {
         if (err) return done(err)
-        if (opts.all || opts.a) {
+        if (this.opts.all || this.opts.a) {
           this.make(Object.keys(this.targets), done)
-        } else if (patterns.length) {
-          this.make(patterns, done)
+        } else if (this.patterns.length) {
+          this.make(this.patterns, done)
         }
       })
-    } else if (opts.all || opts.a) {
+    } else if (this.opts.all || this.opts.a) {
       this.make(Object.keys(this.targets), done)
-    } else if (patterns.length) {
-      this.make(patterns, done)
+    } else if (this.patterns.length) {
+      this.make(this.patterns, done)
     }
   }
 
@@ -134,6 +128,17 @@ class Build {
 
   get files () {
     return Object.keys(this.targets).map(target => path.join(this.dir, target))
+  }
+  
+  get opts () {
+    var cmdOpts = {
+      boolean: ['all', 'a', 'clean', 'c']
+    }
+    return minimist(process.argv.slice(2), cmdOpts)
+  }
+  
+  get patterns () {
+    return this.opts._
   }
 }
 
