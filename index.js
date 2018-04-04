@@ -11,7 +11,7 @@ var rm = require('rimraf')
 class Build {
   constructor (dir) {
     mkdir.sync(dir)
-    
+
     this.targets = {}
     this.dir = dir
     this.gitignore = fs.createWriteStream(path.join(dir, '.gitignore'), 'utf8')
@@ -25,7 +25,7 @@ class Build {
     assert.ok(typeof target === 'string', 'Invalid target: ' + target)
     assert.ok(typeof fn === 'function', 'Invalid target handler for ' + target)
     this.targets[target] = fn
-    this.gitignore.write(target)
+    this.gitignore.write(target + '\n')
   }
 
   clean (files, cb) {
@@ -122,7 +122,7 @@ class Build {
       })
     )
   }
-  
+
   write (file, cb) {
     mkdir(path.dirname(file.path), err => {
       if (err) return cb(err)
@@ -133,14 +133,14 @@ class Build {
   get files () {
     return Object.keys(this.targets).map(target => path.join(this.dir, target))
   }
-  
+
   get opts () {
     var cmdOpts = {
       boolean: ['all', 'a', 'clean', 'c']
     }
     return minimist(process.argv.slice(2), cmdOpts)
   }
-  
+
   get patterns () {
     return this.opts._
   }
