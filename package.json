@@ -1,6 +1,6 @@
 {
   "name": "glob-the-builder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Build files using glob targets and pull streams",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
