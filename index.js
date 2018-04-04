@@ -78,8 +78,7 @@ class Build {
     pull(
       source,
       pull.drain(file => {
-        mkdir(path.dirname(file.path))
-        fs.writeFile(file.path, file.contents, file.enc || file.encoding, cb)
+        this.write(file)
       }, err => {
         if (err) return cb(err)
         this.scan(target, cb)
@@ -123,6 +122,13 @@ class Build {
         else cb()
       })
     )
+  }
+  
+  write (file, cb) {
+    mkdir(path.dirname(file.path), err => {
+      if (err) return cb(err)
+      fs.writeFile(file.path, file.contents, file.enc || file.encoding, cb)
+    })
   }
 
   get files () {
