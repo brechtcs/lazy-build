@@ -67,7 +67,9 @@ class Build {
     if (isMatch !== true) {
       assert.ok(mm.isMatch(target, pattern), target + ' does not match requested target ' + pattern)
     }
-    var source = this.targets[target](this.parse(pattern || target))
+    var params = mm.capture(pattern, target)
+    var source = this.targets[target](params)
+
     if (typeof source.then === 'function') {
       return source.then(() => {
         this.scan(target, cb)
@@ -103,12 +105,6 @@ class Build {
     })
   }
 
-  parse (target) {
-    var parsed = path.parse(target)
-    parsed.dir = path.join(this.dir, parsed.dir)
-    return parsed
-  }
-
   scan (target, cb) {
     var match = false
     pull(
@@ -124,9 +120,10 @@ class Build {
   }
 
   write (file, cb) {
-    mkdir(path.dirname(file.path), err => {
+    var dest = path.join(this.dir, file.path)
+    mkdir(path.dirname(dest), err => {
       if (err) return cb(err)
-      fs.writeFile(file.path, file.contents, file.enc || file.encoding, cb)
+      fs.writeFile(dest, file.contents, file.enc || file.encoding, cb)
     })
   }
 

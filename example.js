@@ -14,7 +14,7 @@ site.command(console.error)
 /**
  * Recipes:
  */
-function index (target) {
+function index () {
   return pull(
     glob('test/*.md'),
     pull.asyncMap(function (src, cb) {
@@ -24,7 +24,7 @@ function index (target) {
     group(Infinity),
     pull.map(function (files) {
       return {
-        path: path.join(target.dir, target.base),
+        path: 'index.html',
         contents: files.join('\n'),
         enc: 'utf8'
       }
@@ -32,9 +32,9 @@ function index (target) {
   )
 }
 
-function post (target) {
+function post (params) {
   return pull(
-    glob('test/' + target.name + '.md'),
+    glob('test/' + params[0] + '.md'),
     pull.asyncMap(function (src, cb) {
       var file = path.parse(src)
       fs.readFile(src, 'utf8', function (err, content) {
@@ -42,7 +42,7 @@ function post (target) {
           return console.error(err)
         }
         cb(null, {
-          path: path.join(target.dir, file.name + '.html'),
+          path: file.name + '.html',
           contents: marked(content),
           enc: 'utf8'
         })
