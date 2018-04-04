@@ -39,7 +39,7 @@ function post (params) {
       var file = path.parse(src)
       fs.readFile(src, 'utf8', function (err, content) {
         if (err) {
-          return console.error(err)
+          return cb(err)
         }
         cb(null, {
           path: file.name + '.html',

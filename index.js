@@ -6,6 +6,7 @@ var minimist = require('minimist')
 var mm = require('micromatch')
 var path = require('path')
 var pull = require('pull-stream')
+var pump = require('pump')
 var rm = require('rimraf')
 
 class Build {
@@ -123,7 +124,11 @@ class Build {
     var dest = path.join(this.dir, file.path)
     mkdir(path.dirname(dest), err => {
       if (err) return cb(err)
-      fs.writeFile(dest, file.contents, file.enc || file.encoding, cb)
+      if (typeof file.contents.pipe === 'function') {
+        pump([file.contents, fs.createWriteStream(dest, file.encoding)], cb)
+      } else {
+        fs.writeFile(dest, file.contents, file.enc || file.encoding, cb)
+      }
     })
   }
 
