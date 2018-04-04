@@ -51,7 +51,7 @@ class Build {
 
     if (opts.clean || opts.c) {
       this.clean(this.files, err => {
-        if (err) done(err)
+        if (err) return done(err)
         if (opts.all || opts.a) {
           this.make(Object.keys(this.targets), done)
         } else if (patterns.length) {
