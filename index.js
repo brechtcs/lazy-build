@@ -53,13 +53,13 @@ class Build {
       this.clean(this.files, err => {
         if (err) done(err)
         if (opts.all || opts.a) {
-          this.make(null, done)
+          this.make(Object.keys(this.targets), done)
         } else if (patterns.length) {
           this.make(patterns, done)
         }
       })
     } else if (opts.all || opts.a) {
-      this.make(null, done)
+      this.make(Object.keys(this.targets), done)
     } else if (patterns.length) {
       this.make(patterns, done)
     }
@@ -96,10 +96,6 @@ class Build {
       } else {
         for (var target in this.targets) {
           if (target === pattern) continue
-          if (!pattern) {
-            this.fixit(target, target, cb, true)
-            continue
-          }
           if (minimatch(pattern, target)) {
             this.fixit(pattern, target, cb, true)
             break
