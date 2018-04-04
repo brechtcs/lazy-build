@@ -10,8 +10,11 @@ var rm = require('rimraf')
 
 class Build {
   constructor (dir) {
+    mkdir.sync(dir)
+    
     this.targets = {}
     this.dir = dir
+    this.gitignore = fs.createWriteStream(path.join(dir, '.gitignore'), 'utf8')
   }
 
   static dest (dir) {
@@ -22,6 +25,7 @@ class Build {
     assert.ok(typeof target === 'string', 'Invalid target: ' + target)
     assert.ok(typeof fn === 'function', 'Invalid target handler for ' + target)
     this.targets[target] = fn
+    this.gitignore.write(target)
   }
 
   clean (files, cb) {
