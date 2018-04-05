@@ -48,16 +48,16 @@ class Build {
         else throw err
       }
     }
-    if (this.opts.clean || this.opts.c) {
+    if (this.args.clean || this.args.c) {
       this.clean(this.files, err => {
         if (err) return done(err)
-        if (this.opts.all || this.opts.a) {
+        if (this.args.all || this.args.a) {
           this.make(Object.keys(this.targets), done)
         } else if (this.patterns.length) {
           this.make(this.patterns, done)
         }
       })
-    } else if (this.opts.all || this.opts.a) {
+    } else if (this.args.all || this.args.a) {
       this.make(Object.keys(this.targets), done)
     } else if (this.patterns.length) {
       this.make(this.patterns, done)
@@ -132,19 +132,19 @@ class Build {
     })
   }
 
-  get files () {
-    return Object.keys(this.targets).map(target => path.join(this.dir, target))
-  }
-
-  get opts () {
+  get args () {
     var cmdOpts = {
       boolean: ['all', 'a', 'clean', 'c']
     }
     return minimist(process.argv.slice(2), cmdOpts)
   }
 
+  get files () {
+    return Object.keys(this.targets).map(target => path.join(this.dir, target))
+  }
+
   get patterns () {
-    return this.opts._
+    return this.args._
   }
 }
 
