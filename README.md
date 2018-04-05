@@ -20,7 +20,7 @@ build.add('*.html', function html (params) {
   
   return pull(
     glob(`src/${name}.md`),
-    pull.asyncMap(fs.readFile)
+    pull.asyncMap(fs.readFile),
     pull.map(buf => buf.toString(encoding)),
     pull.map(marked),
     pull.map(html => {
