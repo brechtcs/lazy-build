@@ -19,7 +19,7 @@ build.add('*.html', function html (params) {
 
   return pull(
     build.src(`src/${name}.md`, 'utf8'),
-    build.target(src => src.name + '.html')
+    build.target(src => `${src.name}.html`),
     pull.map(transform('contents', marked))
   )
 })
