@@ -119,15 +119,44 @@ class Build {
       })
     )
   }
+  
+  src (pattern, enc) {
+    return pull(
+      glob(pattern),
+      pull.asyncMap((path, cb) => {
+        fs.readFile(path, enc, (err, contents) => {
+          if (err) {
+            return cb(err)
+          }
+          var file = {
+            path: path,
+            contents: contents
+          }
+          if (enc) {
+            file.enc = enc
+          }
+          cb(null, file)
+        })
+      })
+    )
+  }
+  
+  target (fn) {
+    return pull.map(file => {
+      file.path = fn(path.parse(file.path))
+      return file
+    })
+  }
 
   write (file, cb) {
     var dest = path.join(this.dir, file.path)
+    var encoding = file.enc || file.encoding
     mkdir(path.dirname(dest), err => {
       if (err) return cb(err)
       if (typeof file.contents.pipe === 'function') {
-        pump([file.contents, fs.createWriteStream(dest, file.encoding)], cb)
+        pump([file.contents, fs.createWriteStream(dest, encoding)], cb)
       } else {
-        fs.writeFile(dest, file.contents, file.enc || file.encoding, cb)
+        fs.writeFile(dest, file.contents, encoding, cb)
       }
     })
   }

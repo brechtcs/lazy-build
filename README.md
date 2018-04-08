@@ -18,17 +18,11 @@ var build = Build.dest('public')
 
 build.add('*.html', function html (params) {
   var name = params[0]
-  var encoding = 'utf8'
 
   return pull(
-    vinyl.src(`src/${name}.md`),
-    pull.map(transform('enc', () => encoding))
-    pull.map(transform('contents', buf => buf.toString(encoding))),
-    pull.map(transform('contents', marked)),
-    pull.map(transform('path', src => {
-      var parsed = path.parse(src)
-      return parsed.name + '.html'
-    }))
+    build.src(`src/${name}.md`, 'utf8),
+    build.target(src => src.name + '.html')
+    pull.map(transform('contents', marked))
   )
 })
 
