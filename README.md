@@ -8,28 +8,26 @@ A GNU Make and Gulp crossover, using `pull-stream` in the engine room.
 // build.js
 
 var Build = require('glob-the-builder')
-var glob = require('pull-glob')
 var marked = require('marked')
+var path = require('path')
 var pull = require('pull-stream')
+var transform = require('prop-transform')
+var vinyl = require('pull-vinyl')
 
 var build = Build.dest('public')
 
 build.add('*.html', function html (params) {
   var name = params[0]
   var encoding = 'utf8'
-  
+
   return pull(
-    glob(`src/${name}.md`),
-    pull.asyncMap(fs.readFile),
-    pull.map(buf => buf.toString(encoding)),
-    pull.map(marked),
-    pull.map(html => {
-      return {
-        path: `${name}.html`,
-        contents: html,
-        enc: encoding
-      }
-    })
+    vinyl.src(`src/${name}.md`),
+    pull.map(transform('contents', buf => buf.toString(encoding))),
+    pull.map(transform('contents', marked)),
+    pull.map(transform('path', src => {
+      var parsed = path.parse(src)
+      return parsed.name + '.html'
+    }))
   )
 })
 
