@@ -22,6 +22,7 @@ build.add('*.html', function html (params) {
 
   return pull(
     vinyl.src(`src/${name}.md`),
+    pull.map(transform('enc', () => encoding))
     pull.map(transform('contents', buf => buf.toString(encoding))),
     pull.map(transform('contents', marked)),
     pull.map(transform('path', src => {
