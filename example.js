@@ -1,52 +1,34 @@
 var Build = require('./')
-var fs = require('fs')
 var glob = require('pull-glob')
 var group = require('pull-group')
 var marked = require('marked')
 var path = require('path')
 var pull = require('pull-stream')
+var transform = require('prop-transform')
 
-var site = Build.dest('test/target')
-site.add('index.html', index)
-site.add('*.html', post)
-site.command(console.error)
+var build = Build.dest('test/target')
 
-/**
- * Recipes:
- */
-function index () {
+build.add('*.html', function post (params) {
   return pull(
-    glob('test/*.md'),
-    pull.asyncMap(function (src, cb) {
-      fs.readFile(src, 'utf8', cb)
-    }),
-    pull.map(marked),
+    build.src(`test/${params[0]}.md`, 'utf8'),
+    build.target(src => `${src.name}.html`),
+    pull.map(transform('contents', marked))
+  )
+})
+
+build.add('index.html', function index () {
+  return pull(
+    build.src('test/*.md', 'utf8'),
+    pull.map(transform('contents', marked)),
     group(Infinity),
     pull.map(function (files) {
       return {
         path: 'index.html',
-        contents: files.join('\n'),
+        contents: files.map(file => file.contents).join('\n'),
         enc: 'utf8'
       }
     })
   )
-}
+})
 
-function post (params) {
-  return pull(
-    glob('test/' + params[0] + '.md'),
-    pull.asyncMap(function (src, cb) {
-      var file = path.parse(src)
-      fs.readFile(src, 'utf8', function (err, content) {
-        if (err) {
-          return cb(err)
-        }
-        cb(null, {
-          path: file.name + '.html',
-          contents: marked(content),
-          enc: 'utf8'
-        })
-      })
-    })
-  )
-}
+build.command()
