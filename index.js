@@ -78,9 +78,10 @@ class Build {
     }
     pull(
       source,
-      pull.drain(file => {
-        this.write(file, cb)
-      }, err => {
+      pull.asyncMap((file, next) => {
+        this.write(file, next)
+      }),
+      pull.drain(null, err => {
         if (err) return cb(err)
         this.scan(target, cb)
       })
