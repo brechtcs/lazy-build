@@ -9,7 +9,7 @@ A GNU Make and Gulp crossover, using `pull-stream` in the engine room.
 
 var Build = require('glob-the-builder')
 var marked = require('marked')
-var pull = require('pull-stream')
+var pull = require('glob-the-builder/pull')
 var transform = require('prop-transform')
 
 var build = Build.dest('public')
