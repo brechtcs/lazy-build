@@ -76,16 +76,6 @@ class Build {
         this.scan(target, cb)
       }).catch(cb)
     }
-    pull(
-      source,
-      pull.asyncMap((file, next) => {
-        this.write(file, next)
-      }),
-      pull.drain(null, err => {
-        if (err) return cb(err)
-        this.scan(target, cb)
-      })
-    )
   }
 
   make (patterns, cb) {
@@ -149,17 +139,26 @@ class Build {
     })
   }
 
-  write (file, cb) {
-    var dest = path.join(this.dir, file.path)
-    var encoding = file.enc || file.encoding
-    mkdir(path.dirname(dest), err => {
-      if (err) return cb(err)
-      if (typeof file.contents.pipe === 'function') {
-        pump([file.contents, fs.createWriteStream(dest, encoding)], cb)
-      } else {
-        fs.writeFile(dest, file.contents, encoding, cb)
-      }
-    })
+  write () {
+    return pull(
+      pull.asyncMap((file, cb) => {
+        var dest = path.join(this.dir, file.path)
+        var encoding = file.enc || file.encoding
+        mkdir(path.dirname(dest), err => {
+          if (err) return cb(err)
+          if (typeof file.contents.pipe === 'function') {
+            pump([file.contents, fs.createWriteStream(dest, encoding)], cb)
+          } else {
+            fs.writeFile(dest, file.contents, encoding, cb)
+          }
+        })
+      }),
+      pull.drain(null, err => {
+        if (err) return cb(err)
+        this.scan(target, cb)
+      })
+    )
+    
   }
 
   get args () {

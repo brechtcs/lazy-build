@@ -12,7 +12,8 @@ build.add('*.html', function post (params) {
   return pull(
     build.src(`test/${params[0]}.md`, 'utf8'),
     build.target(src => `${src.name}.html`),
-    pull.map(transform('contents', marked))
+    pull.map(transform('contents', marked)),
+    build.write()
   )
 })
 
@@ -27,7 +28,8 @@ build.add('index.html', function index () {
         contents: files.map(file => file.contents).join('\n'),
         enc: 'utf8'
       }
-    })
+    }),
+    build.write()
   )
 })
 
