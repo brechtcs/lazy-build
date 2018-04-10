@@ -1,8 +1,6 @@
 var Build = require('./')
-var glob = require('pull-glob')
 var group = require('pull-group')
 var marked = require('marked')
-var path = require('path')
 var pull = require('pull-stream')
 var transform = require('prop-transform')
 

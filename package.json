@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "marked": "^0.3.19",
+    "prop-transform": "^1.0.3",
     "pull-group": "^1.0.1",
     "standard": "^10.0.3",
     "tape": "^4.8.0"

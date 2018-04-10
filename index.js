@@ -76,6 +76,13 @@ class Build {
         this.scan(target, cb)
       }).catch(cb)
     }
+    pull(
+      source,
+      pull.drain(null, err => {
+        if (err) return cb(err)
+        this.scan(target, cb)
+      })
+    )
   }
 
   make (patterns, cb) {
@@ -110,7 +117,7 @@ class Build {
       })
     )
   }
-  
+
   src (pattern, enc) {
     return pull(
       glob(pattern),
@@ -131,7 +138,7 @@ class Build {
       })
     )
   }
-  
+
   target (fn) {
     return pull.map(file => {
       file.path = fn(path.parse(file.path))
@@ -140,25 +147,18 @@ class Build {
   }
 
   write () {
-    return pull(
-      pull.asyncMap((file, cb) => {
-        var dest = path.join(this.dir, file.path)
-        var encoding = file.enc || file.encoding
-        mkdir(path.dirname(dest), err => {
-          if (err) return cb(err)
-          if (typeof file.contents.pipe === 'function') {
-            pump([file.contents, fs.createWriteStream(dest, encoding)], cb)
-          } else {
-            fs.writeFile(dest, file.contents, encoding, cb)
-          }
-        })
-      }),
-      pull.drain(null, err => {
+    return pull.asyncMap((file, cb) => {
+      var dest = path.join(this.dir, file.path)
+      var encoding = file.enc || file.encoding
+      mkdir(path.dirname(dest), err => {
         if (err) return cb(err)
-        this.scan(target, cb)
+        if (typeof file.contents.pipe === 'function') {
+          pump([file.contents, fs.createWriteStream(dest, encoding)], cb)
+        } else {
+          fs.writeFile(dest, file.contents, encoding, cb)
+        }
       })
-    )
-    
+    })
   }
 
   get args () {
