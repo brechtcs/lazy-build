@@ -37,7 +37,7 @@ build.add('index.html', function index () {
 
 build.add('*.css', function styles (params) {
   var plugins = [cssnano]
-  
+
   return pull(
     vinyl.src(`test/${params[0]}.css`),
     toPull.duplex(postcss(plugins)),

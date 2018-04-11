@@ -10,6 +10,7 @@ test('Build example', function (t) {
     t.ok(exists('first.html'), 'first post generated')
     t.ok(exists('second.html'), 'second post generated')
     t.ok(exists('third.html'), 'third post generated')
+    t.ok(exists('style.css'), 'stylesheet generated')
     t.end()
   })
 })
