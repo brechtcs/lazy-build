@@ -46,4 +46,18 @@ build.add('*.css', function styles (params) {
   )
 })
 
+build.add('dat.json', async function manifest () {
+  var manifest = {
+    url: 'dat://79f4eb8409172d6f1482044245c286e700af0c45437d191d99183743d0b91937/',
+    title: 'distilled.pm',
+    description: 'Distilled Pamphlets & Archives'
+  }
+
+  return build.write({
+    path: 'dat.json',
+    contents: JSON.stringify(manifest),
+    enc: 'utf8'
+  })
+})
+
 build.command()

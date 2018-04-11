@@ -6,8 +6,8 @@ var minimist = require('minimist')
 var mm = require('micromatch')
 var path = require('path')
 var pull = require('pull-stream')
-var pump = require('pump')
 var rm = require('rimraf')
+var write = require('./write')
 
 class Build {
   constructor (dir) {
@@ -146,18 +146,25 @@ class Build {
     })
   }
 
-  write () {
-    return pull.asyncMap((file, cb) => {
-      var dest = path.join(this.dir, file.path)
-      var encoding = file.enc || file.encoding
-      mkdir(path.dirname(dest), err => {
-        if (err) return cb(err)
-        if (typeof file.contents.pipe === 'function') {
-          pump([file.contents, fs.createWriteStream(dest, encoding)], cb)
-        } else {
-          fs.writeFile(dest, file.contents, encoding, cb)
-        }
+  write (file) {
+    if (file) {
+      assert.equal(typeof file, 'object', 'file descriptor must be valid object')
+      assert.equal(typeof file.path, 'string', 'file path must be a string')
+      assert.ok(file.contents, 'file needs contents to be written')
+
+      return new Promise((resolve, reject) => {
+        file.path = path.join(this.dir, file.path)
+        write(file, err => {
+          if (err) {
+            return reject(err)
+          }
+          resolve()
+        })
       })
+    }
+    return pull.asyncMap((file, cb) => {
+      file.path = path.join(this.dir, file.path)
+      write(file, cb)
     })
   }
 
