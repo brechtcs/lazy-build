@@ -12,7 +12,7 @@ var build = Build.dest('test/target')
 
 build.add('*.html', function post (params) {
   return pull(
-    build.src(`test/${params[0]}.md`, 'utf8'),
+    build.src(`test/src/${params[0]}.md`, 'utf8'),
     build.target(src => `${src.name}.html`),
     pull.map(transform('contents', marked)),
     build.write()
@@ -21,7 +21,7 @@ build.add('*.html', function post (params) {
 
 build.add('index.html', function index () {
   return pull(
-    build.src('test/*.md', 'utf8'),
+    build.src('test/src/*.md', 'utf8'),
     pull.map(transform('contents', marked)),
     group(Infinity),
     pull.map(function (files) {
@@ -39,7 +39,7 @@ build.add('*.css', function styles (params) {
   var plugins = [cssnano]
 
   return pull(
-    vinyl.src(`test/${params[0]}.css`),
+    vinyl.src(`test/src/${params[0]}.css`),
     toPull.duplex(postcss(plugins)),
     build.target(src => src.base),
     build.write()
