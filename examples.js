@@ -1,5 +1,6 @@
 var Build = require('./')
 var cssnano = require('cssnano')
+var end = require('pull-promise-end')
 var group = require('pull-group')
 var marked = require('marked')
 var pull = require('pull-stream')
@@ -58,6 +59,27 @@ build.add('dat.json', async function manifest () {
     contents: JSON.stringify(manifest),
     enc: 'utf8'
   })
+})
+
+build.add('posts/*.json', async function robots () {
+  var posts = await Promise.resolve([
+    {date: '2018-04-11', body: 'some post'},
+    {date: '2018-04-12', body: 'another post'}
+  ])
+
+  var stream = pull(
+    pull.values(posts),
+    pull.map(post => {
+      return {
+        path: `posts/${post.date}.json`,
+        contents: JSON.stringify(post),
+        enc: 'utf8'
+      }
+    }),
+    build.write()
+  )
+
+  return end(stream)
 })
 
 build.command()
