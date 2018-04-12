@@ -72,17 +72,18 @@ class Build {
     var source = this.targets[target](params)
 
     if (typeof source.then === 'function') {
-      return source.then(() => {
+      source.then(() => {
         this.scan(target, cb)
       }).catch(cb)
+    } else if (typeof source === 'function') {
+      pull(
+        source,
+        pull.drain(null, err => {
+          if (err) return cb(err)
+          this.scan(target, cb)
+        })
+      )
     }
-    pull(
-      source,
-      pull.drain(null, err => {
-        if (err) return cb(err)
-        this.scan(target, cb)
-      })
-    )
   }
 
   make (patterns, cb) {
