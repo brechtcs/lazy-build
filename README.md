@@ -38,8 +38,8 @@ If you want to create files programmatically, without a corresponding source fil
 build.add('dat.json', async function manifest () {
   var manifest = {
     url: 'dat://79f4eb8409172d6f1482044245c286e700af0c45437d191d99183743d0b91937/',
-    title: 'distilled.pm',
-    description: 'Distilled Pamphlets & Archives'
+    title: 'Site name',
+    description: 'Site description'
   }
 
   return build.write({

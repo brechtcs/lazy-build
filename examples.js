@@ -50,8 +50,8 @@ build.add('*.css', function styles (params) {
 build.add('dat.json', async function manifest () {
   var manifest = {
     url: 'dat://79f4eb8409172d6f1482044245c286e700af0c45437d191d99183743d0b91937/',
-    title: 'distilled.pm',
-    description: 'Distilled Pamphlets & Archives'
+    title: 'Site name',
+    description: 'Site description'
   }
 
   return build.write({
@@ -61,18 +61,18 @@ build.add('dat.json', async function manifest () {
   })
 })
 
-build.add('posts/*.json', async function robots () {
-  var posts = await Promise.resolve([
-    {date: '2018-04-11', body: 'some post'},
-    {date: '2018-04-12', body: 'another post'}
+build.add('drafts/*.html', async function robots () {
+  var drafts = Promise.resolve([
+    {name: 'first-draft', body: 'some post'},
+    {name: 'second-draft', body: 'another post'}
   ])
 
   var stream = pull(
-    pull.values(posts),
-    pull.map(post => {
+    pull.values(await drafts),
+    pull.map(draft => {
       return {
-        path: `posts/${post.date}.json`,
-        contents: JSON.stringify(post),
+        path: `drafts/${draft.name}.json`,
+        contents: marked(draft.body),
         enc: 'utf8'
       }
     }),
