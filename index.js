@@ -125,6 +125,10 @@ class Build {
       pull.asyncMap((path, cb) => {
         fs.readFile(path, enc, (err, contents) => {
           if (err) {
+            if (err.code === 'EISDIR') return cb(null, {
+              path: path,
+              dir: true
+            })
             return cb(err)
           }
           var file = {
@@ -136,7 +140,8 @@ class Build {
           }
           cb(null, file)
         })
-      })
+      }),
+      pull.filter(match => !match.dir)
     )
   }
 
