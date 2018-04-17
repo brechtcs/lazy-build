@@ -71,7 +71,7 @@ build.add('drafts/*.html', async function robots () {
     pull.values(await drafts),
     pull.map(draft => {
       return {
-        path: `drafts/${draft.name}.json`,
+        path: `drafts/${draft.name}.html`,
         contents: marked(draft.body),
         enc: 'utf8'
       }
