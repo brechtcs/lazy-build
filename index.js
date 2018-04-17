@@ -1,3 +1,4 @@
+var Path = require('path-jit')
 var assert = require('assert')
 var fs = require('fs')
 var glob = require('pull-glob')
@@ -149,7 +150,7 @@ class Build {
 
   target (fn) {
     return pull.map(file => {
-      file.path = fn(path.parse(file.path))
+      file.path = fn(Path.from(file.path))
       return file
     })
   }
