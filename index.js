@@ -49,16 +49,16 @@ class Build {
         else throw err
       }
     }
-    if (this.args.clean || this.args.c) {
+    if (this.isClean) {
       this.clean(this.files, err => {
         if (err) return done(err)
-        if (this.args.all || this.args.a) {
+        if (this.isAll) {
           this.make(Object.keys(this.targets), done)
         } else if (this.patterns.length) {
           this.make(this.patterns, done)
         }
       })
-    } else if (this.args.all || this.args.a) {
+    } else if (this.isAll) {
       this.make(Object.keys(this.targets), done)
     } else if (this.patterns.length) {
       this.make(this.patterns, done)
@@ -186,6 +186,14 @@ class Build {
 
   get files () {
     return Object.keys(this.targets).map(target => path.join(this.dir, target))
+  }
+
+  get isAll () {
+    return this.args.all || this.args.a
+  }
+
+  get isClean () {
+    return this.args.clean || this.args.c
   }
 
   get patterns () {
