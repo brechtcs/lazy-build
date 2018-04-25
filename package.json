@@ -1,7 +1,7 @@
 {
-  "name": "glob-the-builder",
-  "version": "0.5.0",
-  "description": "Build files using glob targets and pull streams",
+  "name": "lazy-build",
+  "version": "1.0.0",
+  "description": "A lazy build system using pull streams",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
   "scripts": {
@@ -33,17 +33,20 @@
     "test": "test"
   },
   "keywords": [
+    "lazy",
     "build",
     "globs",
     "pull",
-    "streams"
+    "streams",
+    "make",
+    "gulp"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brechtpm/glob-the-builder.git"
+    "url": "git+https://github.com/brechtpm/lazy-build.git"
   },
   "bugs": {
-    "url": "https://github.com/brechtpm/glob-the-builder/issues"
+    "url": "https://github.com/brechtpm/lazy-build/issues"
   },
   "license": "Apache-2.0"
 }

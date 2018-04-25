@@ -1,6 +1,6 @@
-# Glob the Builder
+# lazy-build
 
-A GNU Make and Gulp crossover, using `pull-stream` in the engine room.
+A lazy build system, combining ideas from GNU Make and Gulp, using `pull-stream` in the engine room.
 
 ## Usage
 
@@ -30,7 +30,7 @@ build.command()
 
 With this build script, the command `node build.js --all` will generate a html file in the `public` folder for all markdown files found in `src`. Running `node build.js new-post.html` will only convert `src/new-post.md`, if it exists. Using the `--clean` flag on either command will delete all generated files before rebuilding. Because of the way we define targets, files not recognized by Glob the Builder will be left untouched.
 
-### Creating sourceless files
+### Create files
 
 If you want to create files programmatically, without a corresponding source file on the system, just define plain objects with the properties `path`, `contents`, and if necessary `enc` for the encoding.
 
@@ -50,7 +50,7 @@ build.add('dat.json', async function manifest () {
 })
 ```
 
-### Pagination and concatenation
+### Paginate and concatenate
 
 You can easily concatenate (or paginate) multiple files using the `pull-group` module and the file object model described in the previous section.
 
@@ -74,7 +74,7 @@ build.add('index.html', function index () {
 })
 ```
 
-### Using Gulp plugins
+### Use Gulp plugins
 
 Most Gulp plugins can be used too, using the `pull-vinyl` and `stream-to-pull-stream` modules.
 
