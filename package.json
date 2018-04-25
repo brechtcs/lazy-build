@@ -1,6 +1,6 @@
 {
   "name": "lazy-build",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lazy build system using pull streams",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
@@ -43,10 +43,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brechtpm/lazy-build.git"
+    "url": "git+https://github.com/brechtcs/lazy-build.git"
   },
   "bugs": {
-    "url": "https://github.com/brechtpm/lazy-build/issues"
+    "url": "https://github.com/brechtcs/lazy-build/issues"
   },
   "license": "Apache-2.0"
 }
