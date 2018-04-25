@@ -7,9 +7,9 @@ A lazy build system, combining ideas from GNU Make and Gulp, using `pull-stream`
 ```js
 // build.js
 
-var Build = require('glob-the-builder')
+var Build = require('lazy-build')
 var marked = require('marked')
-var pull = require('glob-the-builder/pull')
+var pull = require('lazy-build/pull')
 var transform = require('prop-transform')
 
 var build = Build.dest('public')
