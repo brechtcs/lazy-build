@@ -1,4 +1,4 @@
-var Path = require('path-jit')
+var Path = require('lazy-path')
 var assert = require('assert')
 var fs = require('fs')
 var glob = require('pull-glob')

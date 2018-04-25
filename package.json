@@ -8,10 +8,10 @@
     "test": "standard && tape test"
   },
   "dependencies": {
+    "lazy-path": "^1.0.2",
     "micromatch": "^3.1.10",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "path-jit": "^1.0.0",
     "pull-glob": "^1.0.7",
     "pull-stream": "^3.6.7",
     "pump": "^3.0.0",
