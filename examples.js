@@ -1,10 +1,10 @@
 var Build = require('./')
 var cssnano = require('cssnano')
-var end = require('pull-promise-end')
 var group = require('pull-group')
 var marked = require('marked')
 var pull = require('pull-stream')
 var postcss = require('gulp-postcss')
+var resolve = require('pull-resolve')
 var toPull = require('stream-to-pull-stream')
 var transform = require('prop-transform')
 var vinyl = require('pull-vinyl')
@@ -79,7 +79,7 @@ build.add('drafts/*.html', async function robots () {
     build.write()
   )
 
-  return end(stream)
+  return resolve(stream)
 })
 
 build.command()

@@ -23,7 +23,7 @@
     "marked": "^0.3.19",
     "prop-transform": "^1.0.3",
     "pull-group": "^1.0.1",
-    "pull-promise-end": "^1.0.0",
+    "pull-resolve": "^1.0.0",
     "pull-vinyl": "^1.2.0",
     "standard": "^10.0.3",
     "stream-to-pull-stream": "^1.7.2",
