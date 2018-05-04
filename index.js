@@ -68,8 +68,8 @@ class Build {
     if (isMatch !== true) {
       assert.ok(mm.isMatch(target, pattern), target + ' does not match requested target ' + pattern)
     }
-    var params = mm.capture(target, pattern)
-    var source = this.targets[target](params)
+    var params = mm.capture(target, pattern) || mm.capture(pattern, target)
+    var source = this.targets[target](params.filter(param => typeof param !== 'undefined'))
 
     if (typeof source.then === 'function') {
       source.then(() => {
@@ -93,13 +93,13 @@ class Build {
     patterns.forEach(pattern => {
       if (this.targets[pattern]) {
         this.fixit(pattern, pattern, cb, true)
-      } else {
-        for (var target in this.targets) {
-          if (target === pattern) continue
-          if (mm.isMatch(pattern, target)) {
-            this.fixit(pattern, target, cb, true)
-            break
-          }
+        if (this.isAll) return
+      }
+      for (var target in this.targets) {
+        if (target === pattern) continue
+        if (mm.isMatch(pattern, target) || mm.isMatch(target, pattern)) {
+          this.fixit(pattern, target, cb, true)
+          if (this.isAll) break
         }
       }
     })
