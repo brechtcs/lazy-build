@@ -7,8 +7,9 @@ var minimist = require('minimist')
 var mm = require('micromatch')
 var path = require('path')
 var pull = require('pull-stream')
+var read = require('./lib/read')
 var rm = require('rimraf')
-var write = require('./write')
+var write = require('./lib/write')
 
 class Build {
   constructor (dir) {
@@ -117,27 +118,7 @@ class Build {
   src (pattern, enc) {
     return pull(
       glob(pattern),
-      pull.asyncMap((path, cb) => {
-        fs.readFile(path, enc, (err, contents) => {
-          if (err) {
-            if (err.code === 'EISDIR') {
-              return cb(null, {
-                path: path,
-                dir: true
-              })
-            }
-            return cb(err)
-          }
-          var file = {
-            path: path,
-            contents: contents
-          }
-          if (enc) {
-            file.enc = enc
-          }
-          cb(null, file)
-        })
-      }),
+      pull.asyncMap((path, cb) => read(path, enc, cb)),
       pull.filter(match => !match.dir)
     )
   }
