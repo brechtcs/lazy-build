@@ -49,18 +49,12 @@ class Build {
         else throw err
       }
     }
-    if (this.isClean) {
+    if (this.isClean || this.isPrune) {
       this.clean(this.files, err => {
-        if (err) return done(err)
-        if (this.isAll) {
-          this.make(Object.keys(this.targets), done)
-        } else if (this.patterns.length) {
-          this.make(this.patterns, done)
-        }
+        if (err) done(err)
+        else this.make(this.patterns, done)
       })
-    } else if (this.isAll) {
-      this.make(Object.keys(this.targets), done)
-    } else if (this.patterns.length) {
+    } else {
       this.make(this.patterns, done)
     }
   }
@@ -179,13 +173,14 @@ class Build {
 
   get args () {
     var cmdOpts = {
-      boolean: ['all', 'a', 'clean', 'c']
+      boolean: ['all', 'a', 'clean', 'c', 'prune', 'p']
     }
     return minimist(process.argv.slice(2), cmdOpts)
   }
 
   get files () {
-    return Object.keys(this.targets).map(target => path.join(this.dir, target))
+    var targets = this.isClean ? Object.keys(this.targets) : this.patterns
+    return targets.map(target => path.join(this.dir, target))
   }
 
   get isAll () {
@@ -196,8 +191,12 @@ class Build {
     return this.args.clean || this.args.c
   }
 
+  get isPrune () {
+    return this.args.prune || this.args.p
+  }
+
   get patterns () {
-    return this.args._
+    return this.isAll ? Object.keys(this.targets) : this.args._
   }
 }
 
