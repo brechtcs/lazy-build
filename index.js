@@ -68,7 +68,7 @@ class Build {
     if (isMatch !== true) {
       assert.ok(mm.isMatch(target, pattern), target + ' does not match requested target ' + pattern)
     }
-    var params = mm.capture(pattern, target)
+    var params = mm.capture(target, pattern)
     var source = this.targets[target](params)
 
     if (typeof source.then === 'function') {
@@ -96,7 +96,7 @@ class Build {
       } else {
         for (var target in this.targets) {
           if (target === pattern) continue
-          if (mm.isMatch(target, pattern)) {
+          if (mm.isMatch(pattern, target)) {
             this.fixit(pattern, target, cb, true)
             break
           }
