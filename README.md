@@ -18,21 +18,21 @@ build.add('*.html', function html (params) {
   var name = params[0]
 
   return pull(
-    build.src(`src/${name}.md`, 'utf8'),
+    build.read(`src/${name}.md`, 'utf8'),
     build.target(src => `${src.name}.html`),
     pull.map(transform('contents', marked)),
     build.write()
   )
 })
 
-build.command()
+build.cli()
 ```
 
 With this build script, the command `node build.js --all` will generate a html file in the `public` folder for all markdown files found in `src`. Running `node build.js new-post.html` will only convert `src/new-post.md`, if it exists. Using the `--clean` flag on either command will delete all generated files before rebuilding. Because of the way we define targets, files not recognized by Glob the Builder will be left untouched.
 
 ### Create files
 
-If you want to create files programmatically, without a corresponding source file on the system, just define plain objects with the properties `path`, `contents`, and if necessary `enc` for the encoding.
+If you want to create files on the fly, without reading any corresponding source file on the system, just define plain objects with the properties `path`, `contents`, and if necessary `enc` for the encoding.
 
 ```js
 build.add('dat.json', async function manifest () {
@@ -59,7 +59,7 @@ var group = require('pull-group')
 
 build.add('index.html', function index () {
   return pull(
-    build.src('test/src/*.md', 'utf8'),
+    build.read('test/src/*.md', 'utf8'),
     pull.map(transform('contents', marked)),
     group(Infinity),
     pull.map(function (files) {

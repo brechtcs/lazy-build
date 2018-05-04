@@ -47,7 +47,7 @@ class Build {
     })
   }
 
-  command (cb) {
+  cli (cb) {
     var done = function (err) {
       if (err) {
         if (cb) cb(err)
@@ -105,6 +105,14 @@ class Build {
     })
   }
 
+  read (pattern, enc) {
+    return pull(
+      glob(pattern),
+      pull.asyncMap((path, cb) => read(path, enc, cb)),
+      pull.filter(match => !match.dir)
+    )
+  }
+
   scan (target, cb) {
     if (this.noScan) {
       return cb()
@@ -119,14 +127,6 @@ class Build {
         if (!match) cb(new Error('No files were created for target ' + target))
         else cb()
       })
-    )
-  }
-
-  src (pattern, enc) {
-    return pull(
-      glob(pattern),
-      pull.asyncMap((path, cb) => read(path, enc, cb)),
-      pull.filter(match => !match.dir)
     )
   }
 

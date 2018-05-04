@@ -13,7 +13,7 @@ var build = Build.dest('test/target')
 
 build.add('*.html', function post (params) {
   return pull(
-    build.src(`test/src/${params[0]}.md`, 'utf8'),
+    build.read(`test/src/${params[0]}.md`, 'utf8'),
     build.target(src => `${src.name}.html`),
     pull.map(transform('contents', marked)),
     build.write()
@@ -22,7 +22,7 @@ build.add('*.html', function post (params) {
 
 build.add('index.html', function index () {
   return pull(
-    build.src('test/src/*.md', 'utf8'),
+    build.read('test/src/*.md', 'utf8'),
     pull.map(transform('contents', marked)),
     group(Infinity),
     pull.map(function (files) {
@@ -82,4 +82,4 @@ build.add('drafts/*.html', async function robots () {
   return resolve(stream)
 })
 
-build.command()
+build.cli()
