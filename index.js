@@ -102,6 +102,9 @@ class Build {
   }
 
   scan (target, cb) {
+    if (this.noScan) {
+      return cb()
+    }
     var match = false
     pull(
       glob(path.join(this.dir, target)),
@@ -154,7 +157,10 @@ class Build {
 
   get args () {
     var cmdOpts = {
-      boolean: ['all', 'a', 'clean', 'c', 'prune', 'p']
+      boolean: true,
+      default: {
+        scan: true
+      }
     }
     return minimist(process.argv.slice(2), cmdOpts)
   }
@@ -174,6 +180,10 @@ class Build {
 
   get isPrune () {
     return this.args.prune || this.args.p
+  }
+
+  get noScan () {
+    return !this.args.scan
   }
 
   get patterns () {
