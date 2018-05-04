@@ -52,7 +52,7 @@ build.add('dat.json', async function manifest () {
 
 ### Paginate and concatenate
 
-You can easily concatenate (or paginate) multiple files using the `pull-group` module and the file object model described in the previous section.
+You can easily concatenate (or paginate) multiple files using the [`pull-group`](https://www.npmjs.com/package/pull-group) module and the file object model described in the previous section.
 
 ```js
 var group = require('pull-group')
@@ -74,9 +74,36 @@ build.add('index.html', function index () {
 })
 ```
 
+### Await before streaming
+
+It's also possible to await an asynchronous call before starting the stream. In that case you should wrap the steam using [`pull-resolve`](https://www.npmjs.com/package/pull-resolve) before returning it.
+
+```js
+var resolve = require('pull-resolve')
+
+build.add('drafts/*.html', async function robots () {
+  var drafts = await cms.getDrafts()
+
+  var stream = pull(
+    pull.values(drafts),
+    pull.map(draft => {
+      return {
+        path: `drafts/${draft.name}.html`,
+        contents: marked(draft.body),
+        enc: 'utf8'
+      }
+    }),
+    build.write()
+  )
+
+  return resolve(stream)
+})
+```
+
+
 ### Use Gulp plugins
 
-Most Gulp plugins can be used too, using the `pull-vinyl` and `stream-to-pull-stream` modules.
+Most Gulp plugins can be used too, using the [`pull-vinyl`](https://www.npmjs.com/package/pull-vinyl) and [`stream-to-pull-stream`](https://www.npmjs.com/package/stream-to-pull-stream) modules.
 
 ```js
 var cssnano = require('cssnano')
