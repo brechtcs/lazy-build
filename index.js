@@ -9,6 +9,7 @@ var path = require('path')
 var pull = require('pull-stream')
 var read = require('./lib/read')
 var rm = require('rimraf')
+var rmEmpty = require('delete-empty')
 var write = require('./lib/write')
 
 class Build {
@@ -39,7 +40,10 @@ class Build {
       if (files.length) {
         return this.clean(files, cb)
       }
-      cb()
+      rmEmpty(this.dir, err => {
+        if (err) cb(err)
+        else cb()
+      })
     })
   }
 
