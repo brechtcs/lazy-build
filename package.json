@@ -1,6 +1,6 @@
 {
   "name": "lazy-build",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "A lazy build system using pull streams",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
