@@ -33,11 +33,13 @@ class Build {
   }
 
   clean (files, cb) {
-    rm(files.pop(), err => {
+    var next = Array.isArray(files) ? files.pop() : files
+
+    rm(next, err => {
       if (err) {
         return cb(err)
       }
-      if (files.length) {
+      if (Array.isArray(files) && files.length) {
         return this.clean(files, cb)
       }
       rmEmpty(this.dir, err => {
@@ -54,7 +56,7 @@ class Build {
         else throw err
       }
     }
-    if (this.isClean || this.isPrune) {
+    if (this.isClean) {
       this.clean(this.files, err => {
         if (err) done(err)
         else this.make(this.patterns, done)
@@ -68,22 +70,26 @@ class Build {
     if (isMatch !== true) {
       assert.ok(mm.isMatch(target, pattern), target + ' does not match requested target ' + pattern)
     }
-    var params = mm.capture(target, pattern) || mm.capture(pattern, target)
-    var source = this.targets[target](params.filter(param => typeof param !== 'undefined'))
+    this.prune(pattern, err => {
+      if (err) return cb(err)
 
-    if (typeof source.then === 'function') {
-      source.then(() => {
-        this.scan(target, cb)
-      }).catch(cb)
-    } else if (typeof source === 'function') {
-      pull(
-        source,
-        pull.drain(null, err => {
-          if (err) return cb(err)
+      var params = mm.capture(target, pattern)
+      var source = this.targets[target](params)
+
+      if (typeof source.then === 'function') {
+        source.then(() => {
           this.scan(target, cb)
-        })
-      )
-    }
+        }).catch(cb)
+      } else if (typeof source === 'function') {
+        pull(
+          source,
+          pull.drain(null, err => {
+            if (err) return cb(err)
+            this.scan(target, cb)
+          })
+        )
+      }
+    })
   }
 
   make (patterns, cb) {
@@ -93,16 +99,23 @@ class Build {
     patterns.forEach(pattern => {
       if (this.targets[pattern]) {
         this.fixit(pattern, pattern, cb, true)
-        if (this.isAll) return
+        return
       }
       for (var target in this.targets) {
         if (target === pattern) continue
-        if (mm.isMatch(pattern, target) || mm.isMatch(target, pattern)) {
+        if (mm.isMatch(pattern, target)) {
           this.fixit(pattern, target, cb, true)
-          if (this.isAll) break
+          return
         }
       }
     })
+  }
+
+  prune (pattern, cb) {
+    if (!this.isPrune) {
+      return cb()
+    }
+    this.clean(path.join(this.dir, pattern), cb)
   }
 
   read (pattern, enc) {
@@ -170,8 +183,7 @@ class Build {
   }
 
   get files () {
-    var targets = this.isClean ? Object.keys(this.targets) : this.patterns
-    return targets.map(target => path.join(this.dir, target))
+    return Object.keys(this.targets).map(target => path.join(this.dir, target))
   }
 
   get isAll () {
