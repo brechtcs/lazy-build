@@ -3,7 +3,6 @@ var assert = require('assert')
 var fs = require('fs')
 var glob = require('pull-glob')
 var mkdir = require('mkdirp')
-var minimist = require('minimist')
 var mm = require('micromatch')
 var path = require('path')
 var pull = require('pull-stream')
@@ -13,16 +12,17 @@ var rmEmpty = require('delete-empty')
 var write = require('./lib/write')
 
 class Build {
-  constructor (dir) {
+  static dest (dir) {
+    return new this(dir)
+  }
+
+  constructor (dir, opts) {
     mkdir.sync(dir)
 
     this.targets = {}
     this.dir = dir
     this.gitignore = fs.createWriteStream(path.join(dir, '.gitignore'), 'utf8')
-  }
-
-  static dest (dir) {
-    return new Build(dir)
+    this.opts = opts
   }
 
   add (target, fn) {
@@ -45,23 +45,6 @@ class Build {
         else cb()
       })
     })
-  }
-
-  cli (cb) {
-    var done = function (err) {
-      if (err) {
-        if (cb) cb(err)
-        else throw err
-      }
-    }
-    if (this.isClean || this.isPrune) {
-      this.clean(this.files, err => {
-        if (err) done(err)
-        else this.make(this.patterns, done)
-      })
-    } else {
-      this.make(this.patterns, done)
-    }
   }
 
   fixit (pattern, target, cb, isMatch) {
@@ -159,39 +142,18 @@ class Build {
     })
   }
 
-  get args () {
-    var cmdOpts = {
-      boolean: true,
-      default: {
-        scan: true
-      }
-    }
-    return minimist(process.argv.slice(2), cmdOpts)
-  }
-
   get files () {
     var targets = this.isClean ? Object.keys(this.targets) : this.patterns
     return targets.map(target => path.join(this.dir, target))
   }
 
-  get isAll () {
-    return this.args.all || this.args.a
-  }
+  set opts (opts) {
+    opts = opts || {}
 
-  get isClean () {
-    return this.args.clean || this.args.c
-  }
-
-  get isPrune () {
-    return this.args.prune || this.args.p
-  }
-
-  get noScan () {
-    return !this.args.scan
-  }
-
-  get patterns () {
-    return this.isAll ? Object.keys(this.targets) : this.args._
+    this.isAll = opts.isAll || false
+    this.isClean = opts.isClean || false
+    this.isPrune = opts.isPrune || false
+    this.noScan = opts.noScan || false
   }
 }
 

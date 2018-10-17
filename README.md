@@ -8,6 +8,7 @@ A lazy build system, combining ideas from GNU Make and Gulp, using `pull-stream`
 // build.js
 
 var Build = require('lazy-build')
+var cli = require('lazy-build/cli')
 var marked = require('marked')
 var pull = require('lazy-build/pull')
 var transform = require('prop-transform')
@@ -25,7 +26,7 @@ build.add('*.html', function html (params) {
   )
 })
 
-build.cli()
+cli(build)
 ```
 
 With this build script, the command `node build.js --all` will generate a html file in the `public` folder for all markdown files found in `src`. Running `node build.js new-post.html` will only convert `src/new-post.md`, if it exists. Using the `--clean` flag on either command will delete all generated files before rebuilding. Because of the way we define targets, files not recognized by Lazy Build will be left untouched.

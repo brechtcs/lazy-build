@@ -1,4 +1,5 @@
 var Build = require('./')
+var cli = require('./cli')
 var cssnano = require('cssnano')
 var group = require('pull-group')
 var marked = require('marked')
@@ -82,4 +83,4 @@ build.add('drafts/*.html', async function robots () {
   return resolve(stream)
 })
 
-build.cli()
+cli(build)
