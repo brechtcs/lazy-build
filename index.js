@@ -47,41 +47,19 @@ class Build {
     })
   }
 
-  fixit (pattern, target, cb, isMatch) {
-    if (isMatch !== true) {
-      assert.ok(mm.isMatch(target, pattern), target + ' does not match requested target ' + pattern)
-    }
-    var params = mm.capture(target, pattern) || mm.capture(target, target)
-    var source = this.targets[target](params)
-
-    if (typeof source.then === 'function') {
-      source.then(() => {
-        this.scan(target, cb)
-      }).catch(cb)
-    } else if (typeof source === 'function') {
-      pull(
-        source,
-        pull.drain(null, err => {
-          if (err) return cb(err)
-          this.scan(target, cb)
-        })
-      )
-    }
-  }
-
   make (patterns, cb) {
     if (!Array.isArray(patterns)) {
       patterns = [patterns]
     }
     patterns.forEach(pattern => {
       if (this.targets[pattern]) {
-        this.fixit(pattern, pattern, cb, true)
+        make.call(this, pattern, pattern, cb)
         if (this.isAll) return
       }
       for (var target in this.targets) {
         if (target === pattern) continue
         if (mm.isMatch(pattern, target) || mm.isMatch(target, pattern)) {
-          this.fixit(pattern, target, cb, true)
+          make.call(this, pattern, target, cb)
           if (this.isAll) return
         }
       }
@@ -154,6 +132,25 @@ class Build {
     this.isClean = opts.isClean || false
     this.isPrune = opts.isPrune || false
     this.noScan = opts.noScan || false
+  }
+}
+
+function make (pattern, target, cb) {
+  var params = mm.capture(target, pattern) || mm.capture(target, target)
+  var source = this.targets[target](params)
+
+  if (typeof source.then === 'function') {
+    source.then(() => {
+      this.scan(target, cb)
+    }).catch(cb)
+  } else if (typeof source === 'function') {
+    pull(
+      source,
+      pull.drain(null, err => {
+        if (err) return cb(err)
+        this.scan(target, cb)
+      })
+    )
   }
 }
 
