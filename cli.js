@@ -16,16 +16,5 @@ module.exports = function (build) {
     noScan: !args.scan
   }
 
-  build.patterns = build.isAll
-    ? Object.keys(build.targets)
-    : args._
-
-  if (build.isClean || build.isPrune) {
-    build.clean(build.files, err => {
-      if (err) done(err)
-      else build.make(build.patterns, done)
-    })
-  } else {
-    build.make(build.patterns, done)
-  }
+  build.make(build.isAll ? Object.keys(build.targets) : args._, done)
 }

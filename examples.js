@@ -12,17 +12,23 @@ var vinyl = require('pull-vinyl')
 
 var build = Build.dest('test/target')
 
-build.add('*.html', function post (params) {
-  return pull(
+build.add('*.html', async function post (params) {
+  await this.prune()
+
+  var stream = pull(
     build.read(`test/src/${params[0]}.md`, 'utf8'),
     build.target(src => `${src.name}.html`),
     pull.map(transform('contents', marked)),
-    build.write()
+    pull.map(file => this.write(file))
   )
+
+  return resolve(stream)
 })
 
-build.add('index.html', function index () {
-  return pull(
+build.add('index.html', async function index (params) {
+  await this.prune()
+
+  var stream = pull(
     build.read('test/src/*.md', 'utf8'),
     pull.map(transform('contents', marked)),
     group(Infinity),
@@ -33,36 +39,46 @@ build.add('index.html', function index () {
         enc: 'utf8'
       }
     }),
-    build.write()
+    pull.map(file => this.write(file))
   )
+
+  return resolve(stream)
 })
 
-build.add('*.css', function styles (params) {
+build.add('*.css', async function styles (params) {
+  await this.prune()
+
   var plugins = [cssnano]
 
-  return pull(
+  var stream = pull(
     vinyl.src(`test/src/${params[0]}.css`),
     toPull.duplex(postcss(plugins)),
     build.target(src => src.base),
-    build.write()
+    pull.map(file => this.write(file))
   )
+
+  return resolve(stream)
 })
 
-build.add('dat.json', async function manifest () {
+build.add('dat.json', async function manifest (params) {
+  await this.prune()
+
   var manifest = {
     url: 'dat://79f4eb8409172d6f1482044245c286e700af0c45437d191d99183743d0b91937/',
     title: 'Site name',
     description: 'Site description'
   }
 
-  return build.write({
+  return this.write({
     path: 'dat.json',
     contents: JSON.stringify(manifest),
     enc: 'utf8'
   })
 })
 
-build.add('drafts/*.html', async function robots () {
+build.add('drafts/*.html', async function drafts (params) {
+  await this.prune()
+
   var drafts = Promise.resolve([
     {name: 'first-draft', body: 'some post'},
     {name: 'second-draft', body: 'another post'}
@@ -77,7 +93,7 @@ build.add('drafts/*.html', async function robots () {
         enc: 'utf8'
       }
     }),
-    build.write()
+    pull.map(file => this.write(file))
   )
 
   return resolve(stream)

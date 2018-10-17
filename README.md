@@ -15,15 +15,17 @@ var transform = require('prop-transform')
 
 var build = Build.dest('public')
 
-build.add('*.html', function html (params) {
-  var name = params[0]
+build.add('*.html', async function post (params) {
+  await this.prune()
 
-  return pull(
-    build.read(`src/${name}.md`, 'utf8'),
+  var stream = pull(
+    build.read(`test/src/${params[0]}.md`, 'utf8'),
     build.target(src => `${src.name}.html`),
     pull.map(transform('contents', marked)),
-    build.write()
+    pull.map(file => this.write(file))
   )
+
+  return resolve(stream)
 })
 
 cli(build)
@@ -37,13 +39,15 @@ If you want to create files on the fly, without reading any corresponding source
 
 ```js
 build.add('dat.json', async function manifest () {
+  await this.prune()
+
   var manifest = {
     url: 'dat://79f4eb8409172d6f1482044245c286e700af0c45437d191d99183743d0b91937/',
     title: 'Site name',
     description: 'Site description'
   }
 
-  return build.write({
+  return this.write({
     path: 'dat.json',
     contents: JSON.stringify(manifest),
     enc: 'utf8'
@@ -58,8 +62,10 @@ You can easily concatenate (or paginate) multiple files using the [`pull-group`]
 ```js
 var group = require('pull-group')
 
-build.add('index.html', function index () {
-  return pull(
+build.add('index.html', async function index (params) {
+  await this.prune()
+
+  var stream = pull(
     build.read('test/src/*.md', 'utf8'),
     pull.map(transform('contents', marked)),
     group(Infinity),
@@ -70,8 +76,10 @@ build.add('index.html', function index () {
         enc: 'utf8'
       }
     }),
-    build.write()
+    pull.map(file => this.write(file))
   )
+
+  return resolve(stream)
 })
 ```
 
@@ -83,6 +91,7 @@ It's also possible to await an asynchronous call before starting the stream. In 
 var resolve = require('pull-resolve')
 
 build.add('drafts/*.html', async function robots () {
+  await this.prune()
   var drafts = await cms.getDrafts()
 
   var stream = pull(
@@ -94,6 +103,7 @@ build.add('drafts/*.html', async function robots () {
         enc: 'utf8'
       }
     }),
+    pull.map(file => this.write(file))
     build.write()
   )
 
@@ -112,15 +122,19 @@ var postcss = require('gulp-postcss')
 var toPull = require('stream-to-pull-stream')
 var vinyl = require('pull-vinyl')
 
-build.add('*.css', function styles (params) {
+build.add('*.css', async function styles (params) {
+  await this.prune()
+
   var plugins = [cssnano]
 
-  return pull(
+  var stream = pull(
     vinyl.src(`test/src/${params[0]}.css`),
     toPull.duplex(postcss(plugins)),
     build.target(src => src.base),
-    build.write()
+    pull.map(file => this.write(file))
   )
+
+  return resolve(stream)
 })
 ```
 

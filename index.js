@@ -5,10 +5,9 @@ var glob = require('pull-glob')
 var mkdir = require('mkdirp')
 var mm = require('micromatch')
 var path = require('path')
+var prune = require('./lib/prune')
 var pull = require('pull-stream')
 var read = require('./lib/read')
-var rm = require('rimraf')
-var rmEmpty = require('delete-empty')
 var write = require('./lib/write')
 
 class Build {
@@ -30,21 +29,6 @@ class Build {
     assert.ok(typeof fn === 'function', 'Invalid target handler for ' + target)
     this.targets[target] = fn
     this.gitignore.write(target + '\n')
-  }
-
-  clean (files, cb) {
-    rm(files.pop(), err => {
-      if (err) {
-        return cb(err)
-      }
-      if (files.length) {
-        return this.clean(files, cb)
-      }
-      rmEmpty(this.dir, err => {
-        if (err) cb(err)
-        else cb()
-      })
-    })
   }
 
   make (patterns, cb) {
@@ -75,7 +59,7 @@ class Build {
   }
 
   scan (target, cb) {
-    if (this.noScan) {
+    if (this.noScan || this.isClean) {
       return cb()
     }
     var match = false
@@ -98,33 +82,6 @@ class Build {
     })
   }
 
-  write (file) {
-    if (file) {
-      assert.equal(typeof file, 'object', 'file descriptor must be valid object')
-      assert.equal(typeof file.path, 'string', 'file path must be a string')
-      assert.ok(file.contents, 'file needs contents to be written')
-
-      return new Promise((resolve, reject) => {
-        file.path = path.join(this.dir, file.path)
-        write(file, err => {
-          if (err) {
-            return reject(err)
-          }
-          resolve()
-        })
-      })
-    }
-    return pull.asyncMap((file, cb) => {
-      file.path = path.join(this.dir, file.path)
-      write(file, cb)
-    })
-  }
-
-  get files () {
-    var targets = this.isClean ? Object.keys(this.targets) : this.patterns
-    return targets.map(target => path.join(this.dir, target))
-  }
-
   set opts (opts) {
     opts = opts || {}
 
@@ -135,9 +92,44 @@ class Build {
   }
 }
 
+function createPrune (pattern) {
+  return function () {
+    if (!this.isClean && !this.isPrune) return
+
+    return new Promise((resolve, reject) => {
+      prune(this.dir, pattern, err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
+}
+
+function createWrite (pattern) {
+  return function (file) {
+    if (this.isClean) return
+
+    assert.equal(typeof file, 'object', 'file descriptor must be valid object')
+    assert.equal(typeof file.path, 'string', 'file path must be a string')
+    assert.ok(mm.isMatch(file.path, pattern), 'file path ' + file.path + ' does not match target glob ' + pattern)
+    assert.ok(file.contents, 'file needs contents to be written')
+
+    return new Promise((resolve, reject) => {
+      file.path = path.join(this.dir, file.path)
+      write(file, err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
+}
+
 function make (pattern, target, cb) {
   var params = mm.capture(target, pattern) || mm.capture(target, target)
-  var source = this.targets[target](params)
+  var source = this.targets[target].call({
+    prune: createPrune(this.isAll ? target : pattern).bind(this),
+    write: createWrite(pattern).bind(this)
+  }, params)
 
   if (typeof source.then === 'function') {
     source.then(() => {
