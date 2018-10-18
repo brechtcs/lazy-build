@@ -5,29 +5,18 @@
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tape test"
+    "test": "standard && tape test.js"
   },
   "dependencies": {
     "delete-empty": "^2.0.0",
-    "lazy-path": "^1.0.2",
     "micromatch": "^3.1.10",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "pull-glob": "^1.0.7",
-    "pull-stream": "^3.6.7",
     "pump": "^3.0.0",
     "rimraf": "^2.6.2"
   },
   "devDependencies": {
-    "cssnano": "^3.10.0",
-    "gulp-postcss": "^7.0.1",
-    "marked": "^0.3.19",
-    "prop-transform": "^1.0.3",
-    "pull-group": "^1.0.1",
-    "pull-resolve": "^1.0.0",
-    "pull-vinyl": "^1.2.0",
     "standard": "^10.0.3",
-    "stream-to-pull-stream": "^1.7.2",
     "tape": "^4.8.0"
   },
   "directories": {

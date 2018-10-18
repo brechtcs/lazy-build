@@ -1,13 +1,9 @@
-var Path = require('lazy-path')
 var assert = require('assert')
 var fs = require('fs')
-var glob = require('pull-glob')
 var mkdir = require('mkdirp')
 var mm = require('micromatch')
 var path = require('path')
 var prune = require('./lib/prune')
-var pull = require('pull-stream')
-var read = require('./lib/read')
 var write = require('./lib/write')
 
 class Build {
@@ -47,38 +43,6 @@ class Build {
           if (this.isAll) return
         }
       }
-    })
-  }
-
-  read (pattern, enc) {
-    return pull(
-      glob(pattern),
-      pull.asyncMap((path, cb) => read(path, enc, cb)),
-      pull.filter(match => !match.dir)
-    )
-  }
-
-  scan (target, cb) {
-    if (this.noScan || this.isClean) {
-      return cb()
-    }
-    var match = false
-    pull(
-      glob(path.join(this.dir, target)),
-      pull.take(1),
-      pull.drain(() => {
-        match = true
-      }, () => {
-        if (!match) cb(new Error('No files were created for target ' + target))
-        else cb()
-      })
-    )
-  }
-
-  target (fn) {
-    return pull.map(file => {
-      file.path = fn(Path.from(file.path))
-      return file
     })
   }
 
@@ -131,19 +95,18 @@ function make (pattern, target, cb) {
     write: createWrite(pattern).bind(this)
   }, params)
 
-  if (typeof source.then === 'function') {
+  if (source && typeof source.then === 'function') {
     source.then(() => {
-      this.scan(target, cb)
+      scan.call(this, target, cb)
     }).catch(cb)
-  } else if (typeof source === 'function') {
-    pull(
-      source,
-      pull.drain(null, err => {
-        if (err) return cb(err)
-        this.scan(target, cb)
-      })
-    )
+  } else {
+    scan.call(this, target, cb)
   }
+}
+
+function scan (target, cb) {
+  if (this.noScan) return cb()
+  cb()
 }
 
 module.exports = Build
