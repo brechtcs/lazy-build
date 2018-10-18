@@ -28,6 +28,8 @@ class Build {
   }
 
   make (patterns, cb) {
+    assert.notEqual(this.isClean, this.isMake, 'Please choose one main Build type: either `isMake` or `isClean`')
+
     if (!Array.isArray(patterns)) {
       patterns = [patterns]
     }
@@ -51,6 +53,7 @@ class Build {
 
     this.isAll = opts.isAll || false
     this.isClean = opts.isClean || false
+    this.isMake = opts.isMake || false
     this.isPrune = opts.isPrune || false
     this.noScan = opts.noScan || false
   }
@@ -71,7 +74,7 @@ function createPrune (pattern) {
 
 function createWrite (pattern) {
   return function (file) {
-    if (this.isClean) return
+    if (!this.isMake) return
 
     assert.equal(typeof file, 'object', 'file descriptor must be valid object')
     assert.equal(typeof file.path, 'string', 'file path must be a string')
