@@ -12,7 +12,6 @@ module.exports = function (build) {
   build.opts = {
     isAll: args.all || args.a,
     isClean: args.clean || args.c,
-    isMake: args.make || args.m,
     isPrune: args.prune || args.p,
     noScan: !args.scan
   }

@@ -10,7 +10,7 @@ test('Basic example', async function (t) {
 
   await clean(example)
 
-  code = await run(example, ['-ma'])
+  code = await run(example, ['-a'])
   t.equal(code, 0)
   t.ok(exists(example, 'test.json'))
 
@@ -25,13 +25,13 @@ test('Multiple example', async function (t) {
   var example = 'multiple'
 
   await clean(example)
-  code = await run(example, ['--make', 'first.html'])
+  code = await run(example, ['first.html'])
   t.equal(code, 0)
   t.ok(exists(example, 'first.html'))
   t.notOk(exists(example, 'second.html'))
 
   await clean(example)
-  code = await run(example, ['--make', 'second.html'])
+  code = await run(example, ['second.html'])
   t.equal(code, 0)
   t.notOk(exists(example, 'first.html'))
   t.ok(exists(example, 'second.html'))
@@ -39,7 +39,7 @@ test('Multiple example', async function (t) {
   await clean(example)
   write(example, 'dummy.html', '')
   t.ok(exists(example, 'dummy.html'))
-  code = await run(example, ['-mpa'])
+  code = await run(example, ['-pa'])
   t.equal(code, 0)
   t.notOk(exists(example, 'dummy.html'))
   t.ok(exists(example, 'first.html'))
