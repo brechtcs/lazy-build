@@ -18,6 +18,7 @@
     "run-parallel": "^1.1.9"
   },
   "devDependencies": {
+    "got": "^9.2.2",
     "marked": "^0.5.1",
     "standard": "^10.0.3",
     "tape": "^4.8.0"

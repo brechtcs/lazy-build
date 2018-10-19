@@ -52,6 +52,18 @@ test('Multiple example', async function (t) {
   t.end()
 })
 
+test('Remote example', async function (t) {
+  var code = 0
+  var example = 'remote'
+
+  await clean(example)
+
+  code = await run(example, ['-a'])
+  t.equal(code, 0)
+  t.ok(exists(example, 'example.html'))
+  t.end()
+})
+
 /**
  * Helpers
  */
