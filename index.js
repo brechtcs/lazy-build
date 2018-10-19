@@ -36,22 +36,30 @@ class Build {
     })
   }
 
-  make (patterns, cb) {
+  make (patterns) {
     if (!Array.isArray(patterns)) {
       patterns = [patterns]
     }
-    patterns.forEach(pattern => {
-      if (this.targets[pattern]) {
-        make.call(this, pattern, pattern, cb)
-        if (this.isAll) return
+
+    return new Promise((resolve, reject) => {
+      function done (err) {
+        if (err) reject(err)
+        else resolve()
       }
-      for (var target in this.targets) {
-        if (target === pattern) continue
-        if (mm.isMatch(pattern, target) || mm.isMatch(target, pattern)) {
-          make.call(this, pattern, target, cb)
+
+      patterns.forEach(pattern => {
+        if (this.targets[pattern]) {
+          make.call(this, pattern, pattern, done)
           if (this.isAll) return
         }
-      }
+        for (var target in this.targets) {
+          if (target === pattern) continue
+          if (mm.isMatch(pattern, target) || mm.isMatch(target, pattern)) {
+            make.call(this, pattern, target, done)
+            if (this.isAll) return
+          }
+        }
+      })
     })
   }
 

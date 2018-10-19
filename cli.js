@@ -1,7 +1,6 @@
 var minimist = require('minimist')
 
 module.exports = async function (build) {
-  var done = function (err) { if (err) throw err }
   var args = minimist(process.argv.slice(2), {
     boolean: true,
     default: {
@@ -18,6 +17,10 @@ module.exports = async function (build) {
   var clean = args.clean || args.c
   var patterns = build.isAll ? Object.keys(build.targets) : args._
 
-  if (clean) await build.clean()
-  build.make(patterns, done)
+  try {
+    if (clean) await build.clean()
+    await build.make(patterns)
+  } catch (err) {
+    console.error(err)
+  }
 }
