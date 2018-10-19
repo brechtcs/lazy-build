@@ -1,4 +1,5 @@
 var assert = require('assert')
+var fg = require('fast-glob')
 var fs = require('fs')
 var mkdir = require('mkdirp')
 var mm = require('micromatch')
@@ -113,14 +114,16 @@ function make (pattern, target, cb) {
     source.then(() => {
       scan.call(this, target, cb)
     }).catch(cb)
-  } else {
-    scan.call(this, target, cb)
   }
 }
 
 function scan (target, cb) {
   if (this.noScan) return cb()
-  cb()
+
+  fg(path.join(this.dir, target)).then(files => {
+    if (files.length) cb()
+    else cb(new Error('No files were generated for target ' + target))
+  }).catch(cb)
 }
 
 module.exports = Build

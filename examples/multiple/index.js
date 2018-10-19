@@ -1,7 +1,7 @@
 var Build = require('../../')
 var cli = require('../../cli')
+var fg = require('fast-glob')
 var fs = require('fs')
-var globby = require('globby')
 var marked = require('marked')
 var path = require('path')
 
@@ -11,7 +11,7 @@ build.add('*.html', async function (params) {
   await this.prune()
 
   var post = params[0]
-  var files = await globby(path.join(__dirname, 'src', post + '.md'))
+  var files = await fg(path.join(__dirname, 'src', post + '.md'))
 
   var pages = files.map(file => {
     var content = fs.readFileSync(file, 'utf8')
