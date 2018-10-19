@@ -27,6 +27,15 @@ class Build {
     this.gitignore.write(target + '\n')
   }
 
+  clean () {
+    return new Promise((resolve, reject) => {
+      prune(this.dir, Object.keys(this.targets), err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
+
   make (patterns, cb) {
     if (!Array.isArray(patterns)) {
       patterns = [patterns]
@@ -50,7 +59,6 @@ class Build {
     opts = opts || {}
 
     this.isAll = opts.isAll || false
-    this.isClean = opts.isClean || false
     this.isPrune = opts.isPrune || false
     this.noScan = opts.noScan || false
   }
@@ -58,10 +66,10 @@ class Build {
 
 function createPrune (pattern) {
   return function () {
-    if (!this.isClean && !this.isPrune) return
+    if (!this.isPrune) return
 
     return new Promise((resolve, reject) => {
-      prune(this.dir, pattern, err => {
+      prune(this.dir, [pattern], err => {
         if (err) reject(err)
         else resolve()
       })
@@ -71,8 +79,6 @@ function createPrune (pattern) {
 
 function createWrite (pattern) {
   return function (file) {
-    if (this.isClean) return
-
     assert.equal(typeof file, 'object', 'file descriptor must be valid object')
     assert.equal(typeof file.path, 'string', 'file path must be a string')
     assert.ok(mm.isMatch(file.path, pattern), 'file path ' + file.path + ' does not match target glob ' + pattern)

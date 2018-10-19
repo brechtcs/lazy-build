@@ -14,7 +14,7 @@ test('Basic example', async function (t) {
   t.equal(code, 0)
   t.ok(exists(example, 'test.json'))
 
-  code = await run(example, ['-ca'])
+  code = await run(example, ['-c'])
   t.equal(code, 0)
   t.notOk(exists(example, 'test.json'))
   t.end()
@@ -45,7 +45,7 @@ test('Multiple example', async function (t) {
   t.ok(exists(example, 'first.html'))
   t.ok(exists(example, 'second.html'))
 
-  code = await run(example, ['-ca'])
+  code = await run(example, ['-c'])
   t.equal(code, 0)
   t.notOk(exists(example, 'first.html'))
   t.notOk(exists(example, 'second.html'))
