@@ -79,6 +79,18 @@ test('Remote example', async function (t) {
   })
 })
 
+test('Browserify example', async function (t) {
+  var code = 0
+  var example = 'browserify'
+
+  await clean(example)
+
+  code = await run(example, ['-a'])
+  t.equal(code, 0)
+  t.ok(exists(example, 'app.js'))
+  t.end()
+})
+
 /**
  * Helpers
  */
