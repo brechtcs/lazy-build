@@ -1,5 +1,6 @@
 var cp = require('child_process')
 var fs = require('fs')
+var http = require('http')
 var path = require('path')
 var rm = require('rimraf')
 var test = require('tape')
@@ -58,10 +59,24 @@ test('Remote example', async function (t) {
 
   await clean(example)
 
-  code = await run(example, ['-a'])
+  code = await run(example, ['-ap'])
+  t.equal(code, 0)
+  t.notOk(exists(example, 'example.html'))
+
+  var content = '<body>example</body>'
+  var server = serve(content, 57455)
+
+  code = await run(example, ['-ap'])
   t.equal(code, 0)
   t.ok(exists(example, 'example.html'))
-  t.end()
+
+  server.close(async () => {
+    code = await run(example, ['-ap'])
+    t.equal(code, 0)
+    t.ok(exists(example, 'example.html'))
+    t.equal(read(example, 'example.html'), content)
+    t.end()
+  })
 })
 
 /**
@@ -88,4 +103,12 @@ function exists (example, file) {
 
 function write (example, file, contents) {
   return fs.writeFileSync(path.join(`examples/${example}/target`, file), contents, 'utf8')
+}
+
+function read (example, file) {
+  return fs.readFileSync(path.join(`examples/${example}/target`, file), 'utf8')
+}
+
+function serve (response, port) {
+  return http.createServer((req, res) => res.end(response)).listen(port)
 }

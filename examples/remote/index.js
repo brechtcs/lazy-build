@@ -7,7 +7,7 @@ var build = Build.dest(path.join(__dirname, '/target'))
 
 build.add('example.html', async function (params) {
   try {
-    var res = await got('http://example.com')
+    var res = await got('http://localhost:57455')
     if (res.statusCode === 200) await this.prune()
     await this.write({
       path: 'example.html',
