@@ -69,7 +69,7 @@ class Build {
 
     this.isAll = opts.isAll || false
     this.isPrune = opts.isPrune || false
-    this.noScan = opts.noScan || false
+    this.noVerify = opts.noVerify || false
   }
 }
 
@@ -105,20 +105,22 @@ function createWrite (pattern) {
 
 function make (pattern, target, cb) {
   var params = mm.capture(target, pattern) || mm.capture(target, target)
-  var source = this.targets[target].call({
+  var task = this.targets[target].call({
     prune: createPrune(this.isAll ? target : pattern).bind(this),
     write: createWrite(pattern).bind(this)
   }, params)
 
-  if (source && typeof source.then === 'function') {
-    source.then(() => {
-      scan.call(this, target, cb)
-    }).catch(cb)
-  }
+  verify.call(this, task, target, cb)
 }
 
-function scan (target, cb) {
-  if (this.noScan) return cb()
+function verify (task, target, cb) {
+  if (this.noVerify) return cb()
+  if (task === undefined || task === null) task = true
+  if (typeof task.then === 'function') {
+    return task.then(res => {
+      verify.call(this, res, target, cb)
+    }).catch(cb)
+  }
 
   fg(path.join(this.dir, target)).then(files => {
     if (files.length) cb()

@@ -4,14 +4,14 @@ module.exports = async function (build) {
   var args = minimist(process.argv.slice(2), {
     boolean: true,
     default: {
-      scan: true
+      verify: true
     }
   })
 
   build.opts = {
     isAll: args.all || args.a,
     isPrune: args.prune || args.p,
-    noScan: !args.scan
+    noVerify: !args.verify
   }
 
   var clean = args.clean || args.c
