@@ -10,7 +10,7 @@ var build = Build.dest(path.join(__dirname, 'target'))
 build.add('*.html', async function (params) {
   await this.prune()
 
-  var post = params[0]
+  var post = params.wildcards[0]
   var files = await fg(path.join(__dirname, 'src', post + '.md'))
 
   var pages = files.map(file => {

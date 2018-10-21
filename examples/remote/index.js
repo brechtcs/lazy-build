@@ -10,7 +10,7 @@ build.add('example.html', async function (params) {
     var res = await got('http://localhost:57455')
     if (res.statusCode === 200) await this.prune()
     await this.write({
-      path: 'example.html',
+      path: params.target,
       contents: res.body,
       enc: 'utf8'
     })

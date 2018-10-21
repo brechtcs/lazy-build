@@ -4,7 +4,7 @@ var path = require('path')
 
 var build = Build.dest(path.join(__dirname, '/target'))
 
-build.add('test.json', async function () {
+build.add('test.json', async function (params) {
   var content = {
     some: 'random',
     json: true
@@ -13,7 +13,7 @@ build.add('test.json', async function () {
   await this.prune()
 
   return this.write({
-    path: 'test.json',
+    path: params.target,
     contents: JSON.stringify(content),
     enc: 'utf8'
   })

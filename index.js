@@ -104,11 +104,11 @@ function createWrite (pattern) {
 }
 
 function make (pattern, target, cb) {
-  var params = mm.capture(target, pattern) || mm.capture(target, target)
+  var wildcards = mm.capture(target, pattern) || mm.capture(target, target)
   var task = this.targets[target].call({
     prune: createPrune(this.isAll ? target : pattern).bind(this),
     write: createWrite(pattern).bind(this)
-  }, params)
+  }, { target, wildcards })
 
   verify.call(this, task, target, cb)
 }
