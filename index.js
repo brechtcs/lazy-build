@@ -17,7 +17,7 @@ class Build {
     mkdir.sync(dir)
 
     this.targets = {}
-    this.dir = dir
+    this.dir = path.resolve(dir)
     this.gitignore = fs.createWriteStream(path.join(dir, '.gitignore'), 'utf8')
     this.opts = opts
   }
@@ -40,6 +40,14 @@ class Build {
     return maybe(cb, promise)
   }
 
+  has (pattern) {
+    for (var target in this.targets) {
+      if (target === pattern) return true
+      if (match(pattern, target)) return true
+    }
+    return false
+  }
+
   make (patterns, cb) {
     if (!Array.isArray(patterns)) {
       patterns = [patterns]
@@ -58,7 +66,7 @@ class Build {
         }
         for (var target in this.targets) {
           if (target === pattern) continue
-          if (mm.isMatch(pattern, target) || mm.isMatch(target, pattern)) {
+          if (match(pattern, target)) {
             make.call(this, pattern, target, done)
             if (this.isAll) return
           }
@@ -67,6 +75,17 @@ class Build {
     })
 
     return maybe(cb, promise)
+  }
+
+  resolve (file) {
+    file = path.resolve(file)
+    if (file.indexOf(this.dir) !== 0) {
+      return null
+    }
+
+    var pattern = file.replace(this.dir + path.sep, '')
+    if (this.has(pattern)) return pattern
+    else return null
   }
 
   set opts (opts) {
@@ -116,6 +135,10 @@ function make (pattern, target, cb) {
   }, { target, wildcards })
 
   verify.call(this, task, target, cb)
+}
+
+function match (pattern, target) {
+  return mm.isMatch(pattern, target) || mm.isMatch(target, pattern)
 }
 
 function verify (task, target, cb) {

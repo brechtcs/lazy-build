@@ -5,7 +5,7 @@
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tape test.js"
+    "test": "standard && tape test/*.js"
   },
   "dependencies": {
     "call-me-maybe": "^1.0.1",
