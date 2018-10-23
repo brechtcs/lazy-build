@@ -60,7 +60,7 @@ test('Remote example', async function (t) {
   await clean(example)
 
   code = await run(example, ['-ap'])
-  t.equal(code, 0)
+  t.equal(code, 1)
   t.notOk(exists(example, 'example.html'))
 
   var content = '<body>example</body>'

@@ -15,8 +15,7 @@ build.add('example.html', async function (params) {
       enc: 'utf8'
     })
   } catch (err) {
-    console.error(err)
-    console.warn('Something went wrong grabbing a remote version of example.html. If present, a previous version was kept in place')
+    console.warn('Failed to fetch remote version of example.html')
   }
 })
 
