@@ -1,6 +1,6 @@
 {
   "name": "lazy-build",
-  "version": "2.0.4",
+  "version": "3.0.0",
   "description": "A lazy build system using pull streams",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
@@ -8,6 +8,7 @@
     "test": "standard && tape test.js"
   },
   "dependencies": {
+    "call-me-maybe": "^1.0.1",
     "delete-empty": "^2.0.0",
     "fast-glob": "^2.2.3",
     "micromatch": "^3.1.10",

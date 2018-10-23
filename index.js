@@ -1,6 +1,7 @@
 var assert = require('assert')
 var fg = require('fast-glob')
 var fs = require('fs')
+var maybe = require('call-me-maybe')
 var mkdir = require('mkdirp')
 var mm = require('micromatch')
 var path = require('path')
@@ -28,21 +29,23 @@ class Build {
     this.gitignore.write(target + '\n')
   }
 
-  clean () {
-    return new Promise((resolve, reject) => {
+  clean (cb) {
+    var promise = new Promise((resolve, reject) => {
       prune(this.dir, Object.keys(this.targets), err => {
         if (err) reject(err)
         else resolve()
       })
     })
+
+    return maybe(cb, promise)
   }
 
-  make (patterns) {
+  make (patterns, cb) {
     if (!Array.isArray(patterns)) {
       patterns = [patterns]
     }
 
-    return new Promise((resolve, reject) => {
+    var promise = new Promise((resolve, reject) => {
       function done (err) {
         if (err) reject(err)
         else resolve()
@@ -62,6 +65,8 @@ class Build {
         }
       })
     })
+
+    return maybe(cb, promise)
   }
 
   set opts (opts) {
