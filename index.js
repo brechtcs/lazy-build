@@ -61,13 +61,13 @@ class Build {
 
       patterns.forEach(pattern => {
         if (this.targets[pattern]) {
-          make.call(this, pattern, pattern, done)
+          execute.call(this, pattern, pattern, done)
           if (this.isAll) return
         }
         for (var target in this.targets) {
           if (target === pattern) continue
           if (match(pattern, target)) {
-            make.call(this, pattern, target, done)
+            execute.call(this, pattern, target, done)
             if (this.isAll) return
           }
         }
@@ -127,7 +127,7 @@ function createWrite (pattern) {
   }
 }
 
-function make (pattern, target, cb) {
+function execute (pattern, target, cb) {
   var wildcards = mm.capture(target, pattern) || mm.capture(target, target)
   var task = this.targets[target].call({
     prune: createPrune(this.isAll ? target : pattern).bind(this),
