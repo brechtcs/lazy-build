@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "call-me-maybe": "^1.0.1",
+    "callbox": "^1.0.0",
     "delete-empty": "^2.0.0",
     "fast-glob": "^2.2.3",
     "micromatch": "^3.1.10",

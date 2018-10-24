@@ -1,4 +1,5 @@
 var assert = require('assert')
+var box = require('callbox')
 var fg = require('fast-glob')
 var fs = require('fs')
 var maybe = require('call-me-maybe')
@@ -30,11 +31,8 @@ class Build {
   }
 
   clean (cb) {
-    var promise = new Promise((resolve, reject) => {
-      prune(this.dir, Object.keys(this.targets), err => {
-        if (err) reject(err)
-        else resolve()
-      })
+    var promise = box(done => {
+      prune(this.dir, Object.keys(this.targets), done)
     })
 
     return maybe(cb, promise)
@@ -53,12 +51,7 @@ class Build {
       patterns = [patterns]
     }
 
-    var promise = new Promise((resolve, reject) => {
-      function done (err) {
-        if (err) reject(err)
-        else resolve()
-      }
-
+    var promise = box(done => {
       patterns.forEach(pattern => {
         if (this.targets[pattern]) {
           execute.call(this, pattern, pattern, done)
@@ -98,32 +91,30 @@ class Build {
 }
 
 function createPrune (pattern) {
-  return function () {
+  return function (cb) {
     if (!this.isPrune) return
 
-    return new Promise((resolve, reject) => {
-      prune(this.dir, [pattern], err => {
-        if (err) reject(err)
-        else resolve()
-      })
+    var promise = box(done => {
+      prune(this.dir, [pattern], done)
     })
+
+    return maybe(cb, promise)
   }
 }
 
 function createWrite (pattern) {
-  return function (file) {
+  return function (file, cb) {
     assert.equal(typeof file, 'object', 'file descriptor must be valid object')
     assert.equal(typeof file.path, 'string', 'file path must be a string')
     assert.ok(mm.isMatch(file.path, pattern), 'file path ' + file.path + ' does not match target glob ' + pattern)
     assert.ok(file.contents, 'file needs contents to be written')
 
-    return new Promise((resolve, reject) => {
+    var promise = box(done => {
       file.path = path.join(this.dir, file.path)
-      write(file, err => {
-        if (err) reject(err)
-        else resolve()
-      })
+      write(file, done)
     })
+
+    return maybe(cb, promise)
   }
 }
 
