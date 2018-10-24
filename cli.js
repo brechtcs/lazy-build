@@ -21,7 +21,7 @@ module.exports = async function (build) {
     if (clean) await build.clean()
     await build.make(patterns)
   } catch (err) {
-    process.stderr.write(err)
+    process.stderr.write(err.stack + '\n')
     process.exit(1)
   }
 }
