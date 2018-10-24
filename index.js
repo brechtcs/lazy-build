@@ -5,6 +5,7 @@ var fs = require('fs')
 var maybe = require('call-me-maybe')
 var mkdir = require('mkdirp')
 var mm = require('micromatch')
+var parallel = require('run-parallel')
 var path = require('path')
 var prune = require('./lib/prune')
 var write = require('./lib/write')
@@ -52,19 +53,26 @@ class Build {
     }
 
     var promise = box(done => {
+      var tasks = []
+      var schedule = (pattern, target) => {
+        tasks.push(fn => execute.call(this, pattern, target, fn))
+      }
+
       patterns.forEach(pattern => {
         if (this.targets[pattern]) {
-          execute.call(this, pattern, pattern, done)
+          schedule(pattern, pattern)
           if (this.isAll) return
         }
         for (var target in this.targets) {
           if (target === pattern) continue
           if (match(pattern, target)) {
-            execute.call(this, pattern, target, done)
+            schedule(pattern, target)
             if (this.isAll) return
           }
         }
       })
+
+      parallel(tasks, done)
     })
 
     return maybe(cb, promise)
