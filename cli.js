@@ -15,7 +15,7 @@ module.exports = async function (build) {
   }
 
   var clean = args.clean || args.c
-  var patterns = build.isAll ? Object.keys(build.targets) : args._
+  var patterns = getPatterns(build, args._)
 
   try {
     if (clean) await build.clean()
@@ -24,4 +24,15 @@ module.exports = async function (build) {
     process.stderr.write(err)
     process.exit(1)
   }
+}
+
+function getPatterns (build, patterns) {
+  if (build.isAll) {
+    return Object.keys(build.targets)
+  }
+
+  return patterns.map(function (pattern) {
+    if (build.has(pattern)) return pattern
+    return build.resolve(pattern)
+  }).filter(pattern => pattern !== null)
 }

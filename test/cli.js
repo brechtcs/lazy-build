@@ -32,7 +32,7 @@ test('Multiple example', async function (t) {
   t.notOk(exists(example, 'second.html'))
 
   await clean(example)
-  code = await run(example, ['second.html'])
+  code = await run(example, ['examples/multiple/target/second.html'])
   t.equal(code, 0)
   t.notOk(exists(example, 'first.html'))
   t.ok(exists(example, 'second.html'))
