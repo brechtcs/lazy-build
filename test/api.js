@@ -1,7 +1,10 @@
 var Build = require('../')
+var mock = require('mock-fs')
 var test = require('tape')
 
 test('Build.has', function (t) {
+  mock()
+
   var build = Build.dest('target')
   build.add('*.txt', function () {})
 
@@ -12,6 +15,8 @@ test('Build.has', function (t) {
 })
 
 test('Build.resolve', function (t) {
+  mock()
+
   var build = Build.dest('target')
   build.add('*.txt', function () {})
 
