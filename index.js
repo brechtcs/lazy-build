@@ -24,10 +24,13 @@ class Build {
     this.opts = opts
   }
 
-  add (target, fn) {
+  add (target, fn, opts) {
+    opts = opts || {}
     assert.ok(typeof target === 'string', 'Invalid target: ' + target)
     assert.ok(typeof fn === 'function', 'Invalid target handler for ' + target)
-    this.targets[target] = fn
+    assert.ok(typeof opts === 'object' && !Array.isArray(opts), 'Invalid options Object')
+
+    this.targets[target] = { fn, opts }
     this.gitignore.write(target + '\n')
   }
 
@@ -127,24 +130,27 @@ function createWrite (pattern) {
 }
 
 function execute (pattern, target, cb) {
+  var task = this.targets[target]
   var wildcards = mm.capture(target, pattern) || mm.capture(target, target)
-  var task = this.targets[target].call({
+  var args = [{ target, wildcards }]
+  var context = {
     prune: createPrune(this.isAll ? target : pattern).bind(this),
     write: createWrite(pattern).bind(this)
-  }, { target, wildcards })
+  }
 
-  verify.call(this, task, target, cb)
+  var result = task.fn.apply(context, args)
+  verify.call(this, result, target, cb)
 }
 
 function match (pattern, target) {
   return mm.isMatch(pattern, target) || mm.isMatch(target, pattern)
 }
 
-function verify (task, target, cb) {
+function verify (result, target, cb) {
   if (this.noVerify) return cb()
-  if (task === undefined || task === null) task = true
-  if (typeof task.then === 'function') {
-    return task.then(res => {
+  if (result === undefined || result === null) result = true
+  if (typeof result.then === 'function') {
+    return result.then(res => {
       verify.call(this, res, target, cb)
     }).catch(cb)
   }
