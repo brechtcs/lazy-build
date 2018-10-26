@@ -122,8 +122,6 @@ test('errors', async function (t) {
   })
 
   err = await fail('image.png')
-  console.log(fs.readdirSync('target'))
-  console.log(err)
   t.ok(err)
   t.ok(err.message.includes('No files were generated for pattern'))
   t.end()
