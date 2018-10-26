@@ -138,8 +138,16 @@ function execute (pattern, target, cb) {
     write: createWrite(pattern).bind(this)
   }
 
-  var result = task.fn.apply(context, args)
-  verify.call(this, result, pattern, cb)
+  if (task.opts.useCallback) {
+    args.push((err, res) => {
+      if (err) return cb(err)
+      verify.call(this, res, pattern, cb)
+    })
+    task.fn.apply(context, args)
+  } else {
+    var result = task.fn.apply(context, args)
+    verify.call(this, result, pattern, cb)
+  }
 }
 
 function match (pattern, target) {
