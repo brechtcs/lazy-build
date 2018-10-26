@@ -11,8 +11,8 @@ var prune = require('./lib/prune')
 var write = require('./lib/write')
 
 class Build {
-  static dest (dir) {
-    return new this(dir)
+  static dest () {
+    return new this(...arguments)
   }
 
   constructor (dir, opts) {
