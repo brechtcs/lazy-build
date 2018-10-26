@@ -139,25 +139,25 @@ function execute (pattern, target, cb) {
   }
 
   var result = task.fn.apply(context, args)
-  verify.call(this, result, target, cb)
+  verify.call(this, result, pattern, cb)
 }
 
 function match (pattern, target) {
   return mm.isMatch(pattern, target) || mm.isMatch(target, pattern)
 }
 
-function verify (result, target, cb) {
+function verify (result, pattern, cb) {
   if (this.noVerify) return cb()
   if (result === undefined || result === null) result = true
   if (typeof result.then === 'function') {
     return result.then(res => {
-      verify.call(this, res, target, cb)
+      verify.call(this, res, pattern, cb)
     }).catch(cb)
   }
 
-  fg(path.join(this.dir, target)).then(files => {
+  fg(path.join(this.dir, pattern)).then(files => {
     if (files.length) cb()
-    else cb(new Error('No files were generated for target ' + target))
+    else cb(new Error('No files were generated for pattern ' + pattern))
   }).catch(cb)
 }
 
