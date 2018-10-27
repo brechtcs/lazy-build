@@ -5,7 +5,7 @@ var path = require('path')
 var rm = require('rimraf')
 var test = require('tape')
 
-test('Basic example', async function (t) {
+test('basic example', async function (t) {
   var code = 0
   var example = 'basic'
 
@@ -21,7 +21,7 @@ test('Basic example', async function (t) {
   t.end()
 })
 
-test('Multiple example', async function (t) {
+test('multiple example', async function (t) {
   var code = 0
   var example = 'multiple'
 
@@ -53,7 +53,7 @@ test('Multiple example', async function (t) {
   t.end()
 })
 
-test('Remote example', async function (t) {
+test('remote example', async function (t) {
   var code = 0
   var example = 'remote'
 
@@ -79,7 +79,7 @@ test('Remote example', async function (t) {
   })
 })
 
-test('Browserify example', async function (t) {
+test('browserify example', async function (t) {
   var code = 0
   var example = 'browserify'
 
@@ -91,9 +91,9 @@ test('Browserify example', async function (t) {
   t.end()
 })
 
-test('Special cases example', async function (t) {
+test('fs.writeFile example', async function (t) {
   var code = 0
-  var example = 'special'
+  var example = 'write-file'
 
   await clean(example)
 
