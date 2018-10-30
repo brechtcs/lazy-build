@@ -26,16 +26,16 @@ test('multiple example', async function (t) {
   var example = 'multiple'
 
   await clean(example)
-  code = await run(example, ['first.json'])
+  code = await run(example, ['1.json'])
   t.equal(code, 0)
-  t.ok(exists(example, 'first.json'))
-  t.notOk(exists(example, 'second.json'))
+  t.ok(exists(example, '1.json'))
+  t.notOk(exists(example, '2.json'))
 
   await clean(example)
-  code = await run(example, ['examples/multiple/target/second.json'])
+  code = await run(example, ['examples/multiple/target/2.json'])
   t.equal(code, 0)
-  t.notOk(exists(example, 'first.json'))
-  t.ok(exists(example, 'second.json'))
+  t.notOk(exists(example, '1.json'))
+  t.ok(exists(example, '2.json'))
 
   await clean(example)
   write(example, 'dummy.json', '')
@@ -43,13 +43,13 @@ test('multiple example', async function (t) {
   code = await run(example, ['-pa'])
   t.equal(code, 0)
   t.notOk(exists(example, 'dummy.json'))
-  t.ok(exists(example, 'first.json'))
-  t.ok(exists(example, 'second.json'))
+  t.ok(exists(example, '1.json'))
+  t.ok(exists(example, '2.json'))
 
   code = await run(example, ['-c'])
   t.equal(code, 0)
-  t.notOk(exists(example, 'first.json'))
-  t.notOk(exists(example, 'second.json'))
+  t.notOk(exists(example, '1.json'))
+  t.notOk(exists(example, '2.json'))
   t.end()
 })
 

@@ -103,19 +103,6 @@ test('errors', async function (t) {
     }
   }
 
-  // Created file does not match target
-  build.add('*.jpg', function () {
-    return this.write({
-      path: 'image.png',
-      contents: Buffer.alloc(8)
-    })
-  })
-
-  err = await fail('image.jpg')
-  t.ok(err)
-  t.ok(err.name.includes('AssertionError'))
-  t.ok(err.message.includes('does not match target glob'))
-
   // No file created for target
   build.add('*.png', function () {
     fs.writeFileSync('target/other.png', Buffer.alloc(8))

@@ -117,8 +117,8 @@ function createWrite (pattern) {
   return function (file, cb) {
     assert.equal(typeof file, 'object', 'file descriptor must be valid object')
     assert.equal(typeof file.path, 'string', 'file path must be a string')
-    assert.ok(mm.isMatch(file.path, pattern), 'file path ' + file.path + ' does not match target glob ' + pattern)
     assert.ok(file.contents, 'file needs contents to be written')
+    if (!mm.isMatch(file.path, pattern)) return
 
     var promise = box(done => {
       file.path = path.join(this.dir, file.path)
