@@ -91,9 +91,9 @@ test('browserify example', async function (t) {
   t.end()
 })
 
-test('fs.writeFile example', async function (t) {
+test('fs example', async function (t) {
   var code = 0
-  var example = 'write-file'
+  var example = 'node-fs'
 
   await clean(example)
 
