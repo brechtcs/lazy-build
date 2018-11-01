@@ -115,8 +115,8 @@ function createPrune (pattern) {
 
 function createWrite (pattern) {
   return function (file, cb) {
-    assert.equal(typeof file, 'object', 'file descriptor must be valid object')
-    assert.equal(typeof file.path, 'string', 'file path must be a string')
+    assert.strictEqual(typeof file, 'object', 'file descriptor must be valid object')
+    assert.strictEqual(typeof file.path, 'string', 'file path must be a string')
     assert.ok(file.contents, 'file needs contents to be written')
     if (!mm.isMatch(file.path, pattern)) return
 

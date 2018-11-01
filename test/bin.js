@@ -12,11 +12,11 @@ test('basic example', async function (t) {
   await clean(example)
 
   code = await run(example, ['-a'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.ok(exists(example, 'test.json'))
 
   code = await run(example, ['-c'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.notOk(exists(example, 'test.json'))
   t.end()
 })
@@ -27,13 +27,13 @@ test('multiple example', async function (t) {
 
   await clean(example)
   code = await run(example, ['1.json'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.ok(exists(example, '1.json'))
   t.notOk(exists(example, '2.json'))
 
   await clean(example)
   code = await run(example, ['examples/multiple/target/2.json'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.notOk(exists(example, '1.json'))
   t.ok(exists(example, '2.json'))
 
@@ -41,13 +41,13 @@ test('multiple example', async function (t) {
   write(example, 'dummy.json', '')
   t.ok(exists(example, 'dummy.json'))
   code = await run(example, ['-pa'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.notOk(exists(example, 'dummy.json'))
   t.ok(exists(example, '1.json'))
   t.ok(exists(example, '2.json'))
 
   code = await run(example, ['-c'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.notOk(exists(example, '1.json'))
   t.notOk(exists(example, '2.json'))
   t.end()
@@ -60,21 +60,21 @@ test('remote example', async function (t) {
   await clean(example)
 
   code = await run(example, ['-ap'])
-  t.equal(code, 1)
+  t.strictEqual(code, 1)
   t.notOk(exists(example, 'example.html'))
 
   var content = '<body>example</body>'
   var server = serve(content, 57455)
 
   code = await run(example, ['-ap'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.ok(exists(example, 'example.html'))
 
   server.close(async () => {
     code = await run(example, ['-ap'])
-    t.equal(code, 0)
+    t.strictEqual(code, 0)
     t.ok(exists(example, 'example.html'))
-    t.equal(read(example, 'example.html'), content)
+    t.strictEqual(read(example, 'example.html'), content)
     t.end()
   })
 })
@@ -86,23 +86,22 @@ test('browserify example', async function (t) {
   await clean(example)
 
   code = await run(example, ['-a'])
-  t.equal(code, 0)
+  t.strictEqual(code, 0)
   t.ok(exists(example, 'app.js'))
   t.end()
 })
 
-test('fs example', async function (t) {
+test('vfile example', async function (t) {
   var code = 0
-  var example = 'node-fs'
+  var example = 'vfile'
 
   await clean(example)
 
   code = await run(example, ['-a'])
-  t.equal(code, 0)
-  t.ok(exists(example, 'sync.txt'))
-  t.equal(read(example, 'sync.txt'), 'sync test')
-  t.ok(exists(example, 'callback.txt'))
-  t.equal(read(example, 'callback.txt'), 'callback test')
+  t.strictEqual(code, 0)
+  t.ok(exists(example, 'about.html'))
+  t.ok(exists(example, 'contact.html'))
+  t.ok(exists(example, 'index.html'))
   t.end()
 })
 

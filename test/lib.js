@@ -27,12 +27,12 @@ test('add, has & resolve', function (t) {
   t.ok(build.has('any.txt'))
   t.notOk(build.has('any.md'))
 
-  t.equal(build.resolve('target/*.txt'), '*.txt')
-  t.equal(build.resolve('target/any.txt'), 'any.txt')
+  t.strictEqual(build.resolve('target/*.txt'), '*.txt')
+  t.strictEqual(build.resolve('target/any.txt'), 'any.txt')
   t.notOk(build.resolve('target/any.md'))
 
   process.nextTick(() => {
-    t.equal(read('.gitignore'), '*.txt\n')
+    t.strictEqual(read('.gitignore'), '*.txt\n')
     t.end()
   })
 })
@@ -70,13 +70,13 @@ test('make & clean', async function (t) {
   await build.make('first.txt')
   t.ok(exists('leftover.txt'))
   t.ok(exists('first.txt'))
-  t.equal(read('first.txt'), 'first')
+  t.strictEqual(read('first.txt'), 'first')
 
   await build.make('second.txt')
   t.ok(exists('leftover.txt'))
   t.ok(exists('first.txt'))
   t.ok(exists('second.txt'))
-  t.equal(read('second.txt'), 'second')
+  t.strictEqual(read('second.txt'), 'second')
 
   await build.make('*.txt')
   t.notOk(exists('leftover.txt'))
