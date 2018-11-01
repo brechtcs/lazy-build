@@ -15,7 +15,10 @@ var build = Build.dest(path.join(__dirname, 'target'))
 build.add('*.html', async function (params) {
   await this.prune()
 
-  for await (var source of fg.stream(path.join(__dirname, 'src', params.wildcards[0] + '.md'))) {
+  var page = params.wildcards[0]
+  var sources = fg.stream(path.join(__dirname, 'src', page + '.md'))
+
+  for await (var source of sources) {
     var file = await vfile.read(source)
     file.dirname = ''
     file.extname = '.html'

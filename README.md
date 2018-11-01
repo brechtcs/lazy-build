@@ -82,6 +82,49 @@ Now let's assume you change your dataset, removing the last item. This is where 
 - `node build.js --prune 3.json` will now delete the file `target/3.json`, because the corresponding data point wasn't found. The other files are left untouched.
 - `node build.js --prune *.json` on the other hand deletes `target/3.json`, and rebuilds `target/1.json` and `target/2.json` as well.
 
+### From filesystem
+
+There is no builtin way to read files from `lazy-build`. Just using Node's `fs` module directly might suffice in a lot of cases. If you need something more comprehensive, consider using `[vfile](https://github.com/vfile/vfile)`. Vfiles are supported in `lazy-build` as first class citizens:
+
+```js
+var Build = require('lazy-build')
+var cli = require('lazy-build/cli')
+var doc = require('rehype-document')
+var fg = require('fast-glob')
+var format = require('rehype-format')
+var rehype = require('remark-rehype')
+var remark = require('remark-parse')
+var stringify = require('rehype-stringify')
+var unified = require('unified')
+var vfile = require('to-vfile')
+
+var build = Build.dest('target')
+
+build.add('*.html', async function (params) {
+  await this.prune()
+
+  var page = params.wildcards[0]
+  var sources = fg.stream(`src/${page}.md`)
+
+  for await (var source of sources) {
+    var file = await vfile.read(source)
+    file.dirname = ''
+    file.extname = '.html'
+    file = await unified()
+      .use(remark)
+      .use(rehype)
+      .use(doc)
+      .use(format)
+      .use(stringify)
+      .process(file)
+
+    await this.write(file)
+  }
+})
+
+cli(build)
+```
+
 ## License
 
 Apache-2.0
