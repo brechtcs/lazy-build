@@ -105,6 +105,19 @@ test('vfile example', async function (t) {
   t.end()
 })
 
+test('gulp example', async function (t) {
+  var code = 0
+  var example = 'gulp'
+
+  await clean(example)
+
+  code = await run(example, ['-a'])
+  t.strictEqual(code, 0)
+  t.ok(exists(example, 'main.css'))
+  t.ok(exists(example, 'theme.css'))
+  t.end()
+})
+
 /**
  * Helpers
  */

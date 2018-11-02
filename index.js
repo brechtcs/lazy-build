@@ -15,12 +15,12 @@ class Build {
     return new this(...arguments)
   }
 
-  constructor (dir, opts) {
-    mkdir.sync(dir)
+  constructor (dest, opts) {
+    mkdir.sync(dest)
 
     this.targets = {}
-    this.dir = path.resolve(dir)
-    this.gitignore = fs.createWriteStream(path.join(dir, '.gitignore'), 'utf8')
+    this.dest = path.resolve(dest)
+    this.gitignore = fs.createWriteStream(path.join(dest, '.gitignore'), 'utf8')
     this.opts = opts
   }
 
@@ -36,7 +36,7 @@ class Build {
 
   clean (cb) {
     var promise = box(done => {
-      prune(this.dir, Object.keys(this.targets), done)
+      prune(this.dest, Object.keys(this.targets), done)
     })
 
     return maybe(cb, promise)
@@ -83,11 +83,11 @@ class Build {
 
   resolve (file) {
     file = path.resolve(file)
-    if (file.indexOf(this.dir) !== 0) {
+    if (file.indexOf(this.dest) !== 0) {
       return null
     }
 
-    var pattern = file.replace(this.dir + path.sep, '')
+    var pattern = file.replace(this.dest + path.sep, '')
     if (this.has(pattern)) return pattern
     else return null
   }
@@ -106,7 +106,7 @@ function createPrune (pattern) {
     if (!this.isPrune) return
 
     var promise = box(done => {
-      prune(this.dir, [pattern], done)
+      prune(this.dest, [pattern], done)
     })
 
     return maybe(cb, promise)
@@ -118,10 +118,15 @@ function createWrite (pattern) {
     assert.strictEqual(typeof file, 'object', 'file descriptor must be valid object')
     assert.strictEqual(typeof file.path, 'string', 'file path must be a string')
     assert.ok(file.contents, 'file needs contents to be written')
-    if (!mm.isMatch(file.path, pattern)) return
 
     var promise = box(done => {
-      file.path = path.join(this.dir, file.path)
+      file.path = file.relative
+        ? path.join(this.dest, file.relative)
+        : path.join(this.dest, file.path)
+
+      if (!mm.isMatch(file.path, pattern)) {
+        return done()
+      }
       write(file, done)
     })
 
@@ -135,7 +140,7 @@ function execute (pattern, target, cb) {
   var args = [{ target, wildcards }]
   var context = {
     prune: createPrune(this.isAll ? target : pattern).bind(this),
-    write: createWrite(pattern).bind(this)
+    write: createWrite(path.join(this.dest, pattern)).bind(this)
   }
 
   if (task.opts.useCallback) {
@@ -163,7 +168,7 @@ function verify (result, pattern, cb) {
     }).catch(cb)
   }
 
-  fg(path.join(this.dir, pattern)).then(files => {
+  fg(path.join(this.dest, pattern)).then(files => {
     if (files.length) cb()
     else cb(new Error('No files were generated for pattern ' + pattern))
   }).catch(cb)
