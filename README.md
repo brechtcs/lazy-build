@@ -125,6 +125,38 @@ build.add('*.html', async function (params) {
 cli(build)
 ```
 
+The same goes for the Vinyl objects used by Gulp. They too can be handed to `this.write` without adaptation. This makes it possible to reuse your Gulp workflows with only small adjustments. Take for example this typical Less-to-CSS pipeline:
+
+```js
+var Build = require('lazy-build')
+var autoprefixer = require('gulp-autoprefixer')
+var cli = require('lazy-build/cli')
+var cssnano = require('gulp-cssnano')
+var less = require('gulp-less')
+var gulp = require('vinyl-fs')
+
+var build = Build.dest('target')
+
+build.add('*.css', async function (params) {
+  var name = params.wildcards[0]
+  var pipeline = gulp.src(`src/${name}.less`))
+    .pipe(less())
+    .pipe(autoprefixer())
+    .pipe(cssnano())
+
+  for await (var file of pipeline) {
+    await this.write(file)
+  }
+})
+
+cli(build)
+```
+
+There's two main changes compared to a standard Gulp stream:
+
+1. We've replaced `gulp.dest` with an asynchronous iteration calling `this.write`. This ensures that only the requested CSS files are written to the filesystem.
+2. In `gulp.src` we're using `params.wildcards[0]` instead of a regular glob pattern. This makes building individual CSS files more efficient.
+
 ## License
 
 Apache-2.0
