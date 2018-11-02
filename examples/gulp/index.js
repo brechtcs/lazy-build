@@ -9,6 +9,8 @@ var path = require('path')
 var build = Build.dest(path.join(__dirname, '/target'))
 
 build.add('*.css', async function (params) {
+  await this.prune()
+
   var name = params.wildcards[0]
   var pipeline = gulp.src(path.join(__dirname, 'src', name + '.less'))
     .pipe(less())

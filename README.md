@@ -138,6 +138,8 @@ var gulp = require('vinyl-fs')
 var build = Build.dest('target')
 
 build.add('*.css', async function (params) {
+  await this.prune()
+
   var name = params.wildcards[0]
   var pipeline = gulp.src(`src/${name}.less`))
     .pipe(less())
