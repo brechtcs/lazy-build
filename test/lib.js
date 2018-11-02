@@ -48,7 +48,7 @@ test('make & clean', async function (t) {
     isPrune: true
   })
 
-  build.add('*.txt', async function (params) {
+  build.add('*.txt', async (params) => {
     await this.prune()
 
     var name = params.wildcards[0]
