@@ -84,7 +84,7 @@ Now let's assume you change your dataset, removing the last item. This is where 
 
 ### From filesystem
 
-There is no builtin way to read files from `lazy-build`. Just using Node's `fs` module directly might suffice in a lot of cases. If you need something more comprehensive, consider using `[vfile](https://github.com/vfile/vfile)`. Vfiles are supported in `lazy-build` as first class citizens:
+There is no builtin way to read files from `lazy-build`. Just using Node's `fs` module directly might suffice in a lot of cases. If you need something more comprehensive, consider using `to-vfile`. [Vfiles](https://github.com/vfile/vfile) are supported in `lazy-build` as first class citizens:
 
 ```js
 var Build = require('lazy-build')
@@ -125,7 +125,7 @@ build.add('*.html', async function (params) {
 cli(build)
 ```
 
-The same goes for the Vinyl objects used by Gulp. They too can be handed to `this.write` without adaptation. This makes it possible to reuse your Gulp workflows with only small adjustments. Take for example this typical Less-to-CSS pipeline:
+The same goes for the [Vinyl](https://github.com/gulpjs/vinyl) objects used by Gulp. They too can be handed to `this.write` without adaptation. This makes it possible to reuse your Gulp workflows with only small adjustments. Take for example this typical Less-to-CSS pipeline:
 
 ```js
 var Build = require('lazy-build')
