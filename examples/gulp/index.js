@@ -8,17 +8,17 @@ var path = require('path')
 
 var build = Build.dest(path.join(__dirname, '/target'))
 
-build.add('*.css', async function (params) {
-  await this.prune()
+build.add('*.css', async function (target) {
+  await target.prune()
 
-  var name = params.wildcards[0]
+  var name = target.wildcards[0]
   var pipeline = gulp.src(path.join(__dirname, 'src', name + '.less'))
     .pipe(less())
     .pipe(autoprefixer())
     .pipe(cssnano())
 
   for await (var file of pipeline) {
-    await this.write(file)
+    await target.write(file)
   }
 })
 

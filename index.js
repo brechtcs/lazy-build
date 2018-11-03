@@ -1,3 +1,4 @@
+var TargetContext = require('./lib/context')
 var assert = require('assert')
 var box = require('callbox')
 var fg = require('fast-glob')
@@ -8,7 +9,6 @@ var mm = require('micromatch')
 var parallel = require('run-parallel')
 var path = require('path')
 var prune = require('./lib/prune')
-var write = require('./lib/write')
 
 class Build {
   static dest () {
@@ -36,7 +36,10 @@ class Build {
 
   clean (cb) {
     var promise = box(done => {
-      prune(this.dest, Object.keys(this.targets), done)
+      var files = Object.keys(this.targets).map(target => {
+        return path.join(this.dest, target)
+      })
+      prune(this.dest, files, done)
     })
 
     return maybe(cb, promise)
@@ -58,7 +61,7 @@ class Build {
     var promise = box(done => {
       var tasks = []
       var schedule = (pattern, target) => {
-        tasks.push(fn => execute.call(this, pattern, target, fn))
+        tasks.push(end => execute.call(this, pattern, target, end))
       }
 
       patterns.forEach(pattern => {
@@ -101,56 +104,17 @@ class Build {
   }
 }
 
-function createPrune (pattern) {
-  return function (cb) {
-    if (!this.isPrune) return
-
-    var promise = box(done => {
-      prune(this.dest, [pattern], done)
-    })
-
-    return maybe(cb, promise)
-  }
-}
-
-function createWrite (pattern) {
-  return function (file, cb) {
-    assert.strictEqual(typeof file, 'object', 'file descriptor must be valid object')
-    assert.strictEqual(typeof file.path, 'string', 'file path must be a string')
-    assert.ok(file.contents, 'file needs contents to be written')
-
-    var promise = box(done => {
-      file.path = file.relative
-        ? path.join(this.dest, file.relative)
-        : path.join(this.dest, file.path)
-
-      if (!mm.isMatch(file.path, pattern)) {
-        return done()
-      }
-      write(file, done)
-    })
-
-    return maybe(cb, promise)
-  }
-}
-
 function execute (pattern, target, cb) {
   var task = this.targets[target]
-  var wildcards = mm.capture(target, pattern) || mm.capture(target, target)
-  var args = [{ target, wildcards }]
-  var context = {
-    prune: createPrune(this.isAll ? target : pattern).bind(this),
-    write: createWrite(path.join(this.dest, pattern)).bind(this)
-  }
+  var ctx = new TargetContext(this, target, pattern)
 
   if (task.opts.useCallback) {
-    args.push((err, res) => {
+    task.fn(ctx, (err, result) => {
       if (err) return cb(err)
-      verify.call(this, res, pattern, cb)
+      verify.call(this, result, pattern, cb)
     })
-    task.fn.apply(context, args)
   } else {
-    var result = task.fn.apply(context, args)
+    var result = task.fn(ctx)
     verify.call(this, result, pattern, cb)
   }
 }

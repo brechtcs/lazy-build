@@ -5,14 +5,14 @@ var path = require('path')
 
 var build = Build.dest(path.join(__dirname, '/target'))
 
-build.add('example.html', async function (params) {
+build.add('example.html', async function (target) {
   try {
     var res = await got('http://localhost:57455')
-    if (res.statusCode === 410) await this.prune()
+    if (res.statusCode === 410) await target.prune()
     if (res.statusCode !== 200) return
 
-    await this.write({
-      path: params.target,
+    await target.write({
+      path: target.path,
       contents: res.body
     })
   } catch (err) {

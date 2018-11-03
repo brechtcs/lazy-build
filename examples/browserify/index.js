@@ -5,11 +5,11 @@ var path = require('path')
 
 var build = Build.dest(path.join(__dirname, '/target'))
 
-build.add('app.js', function (params) {
+build.add('app.js', function (target) {
   var bs = browserify(path.join(__dirname, 'src/app.js'))
 
-  return this.write({
-    path: params.target,
+  return target.write({
+    path: target.path,
     contents: bs.bundle()
   })
 })

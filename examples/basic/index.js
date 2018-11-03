@@ -4,9 +4,9 @@ var path = require('path')
 
 var build = Build.dest(path.join(__dirname, '/target'))
 
-build.add('test.json', function (params) {
-  return this.write({
-    path: params.target,
+build.add('test.json', function (target) {
+  return target.write({
+    path: target.path,
     contents: JSON.stringify({
       type: 'random',
       data: true

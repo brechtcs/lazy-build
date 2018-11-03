@@ -4,8 +4,8 @@ var path = require('path')
 
 var build = Build.dest(path.join(__dirname, 'target'))
 
-build.add('*.json', async function (params) {
-  await this.prune()
+build.add('*.json', async function (target) {
+  await target.prune()
 
   var data = [
     { dit: 32, dat: true },
@@ -16,7 +16,7 @@ build.add('*.json', async function (params) {
   var targets = data.map((item, i) => {
     var number = i + 1
 
-    return this.write({
+    return target.write({
       path: number + '.json',
       contents: JSON.stringify(item, null, 2)
     })

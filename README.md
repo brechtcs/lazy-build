@@ -20,9 +20,9 @@ var cli = require('lazy-build/cli')
 
 var build = Build.dest('target'))
 
-build.add('test.json', function (params) {
-  return this.write({
-    path: params.target,
+build.add('test.json', function (target) {
+  return target.write({
+    path: target.path,
     contents: JSON.stringify({
       type: 'random',
       data: true
@@ -47,8 +47,8 @@ var cli = require('lazy-build/cli')
 
 var build = Build.dest('target'))
 
-build.add('*.json', async function (params) {
-  await this.prune()
+build.add('*.json', async function (target) {
+  await target.prune()
 
   var data = [
     { dit: 32, dat: true },
@@ -59,7 +59,7 @@ build.add('*.json', async function (params) {
   var targets = data.map((item, i) => {
     var number = i + 1
 
-    return this.write({
+    return target.write({
       path: number + '.json',
       contents: JSON.stringify(item, null, 2)
     })
@@ -77,7 +77,7 @@ There's a couple of commands you can run now:
 - You can (re)build any file separately too, for example `node build.js 2.json`. The other files will remain untouched.
 - `node build.js --clean` deletes all the files matching `target/*.json`. This can be combined with `--all` or another target to rebuild things from scratch.
 
-Now let's assume you change your dataset, removing the last item. This is where the `await this.prune()` call goes to work.
+Now let's assume you change your dataset, removing the last item. This is where the `await target.prune()` call goes to work.
 
 - `node build.js --prune 3.json` will now delete the file `target/3.json`, because the corresponding data point wasn't found. The other files are left untouched.
 - `node build.js --prune *.json` on the other hand deletes `target/3.json`, and rebuilds `target/1.json` and `target/2.json` as well.
@@ -88,7 +88,7 @@ There is no builtin way to read files from `lazy-build`. Just using Node's `fs` 
 
 #### Vfile
 
-One excellent option is to dive into the `vfile` ecosystem. [Vfiles](https://github.com/vfile/vfile) are supported in `lazy-build` as first class citizens, meaning they can be passed to `this.write` without adaption. This example uses `to-vfile` to read some markdown files and then transforms them to HTML using `unified` plugins:
+One excellent option is to dive into the `vfile` ecosystem. [Vfiles](https://github.com/vfile/vfile) are supported in `lazy-build` as first class citizens, meaning they can be passed to `target.write` without adaption. This example uses `to-vfile` to read some markdown files and then transforms them to HTML using `unified` plugins:
 
 ```js
 var Build = require('lazy-build')
@@ -104,10 +104,10 @@ var vfile = require('to-vfile')
 
 var build = Build.dest('target')
 
-build.add('*.html', async function (params) {
-  await this.prune()
+build.add('*.html', async function (target) {
+  await target.prune()
 
-  var page = params.wildcards[0]
+  var page = target.wildcards[0]
   var sources = fg.stream(`src/${page}.md`)
 
   for await (var source of sources) {
@@ -122,7 +122,7 @@ build.add('*.html', async function (params) {
       .use(stringify)
       .process(file)
 
-    await this.write(file)
+    await target.write(file)
   }
 })
 
@@ -131,7 +131,7 @@ cli(build)
 
 #### Gulp
 
-The same goes for the [Vinyl](https://github.com/gulpjs/vinyl) objects used by Gulp. They too can be handed to `this.write` without adaptation. This makes it possible to reuse Gulp workflows with only small adjustments. Take for example this typical Less-to-CSS pipeline:
+The same goes for the [Vinyl](https://github.com/gulpjs/vinyl) objects used by Gulp. They too can be handed to `target.write` without adaptation. This makes it possible to reuse Gulp workflows with only small adjustments. Take for example this typical Less-to-CSS pipeline:
 
 ```js
 var Build = require('lazy-build')
@@ -143,17 +143,17 @@ var gulp = require('vinyl-fs')
 
 var build = Build.dest('target')
 
-build.add('*.css', async function (params) {
-  await this.prune()
+build.add('*.css', async function (target) {
+  await target.prune()
 
-  var name = params.wildcards[0]
+  var name = target.wildcards[0]
   var pipeline = gulp.src(`src/${name}.less`))
     .pipe(less())
     .pipe(autoprefixer())
     .pipe(cssnano())
 
   for await (var file of pipeline) {
-    await this.write(file)
+    await target.write(file)
   }
 })
 
@@ -162,8 +162,8 @@ cli(build)
 
 There's two main changes compared to a standard Gulp stream:
 
-1. We've replaced `gulp.dest` with an asynchronous iteration calling `this.write`. This ensures that only the requested CSS files are written to the file system.
-2. In `gulp.src` we're using `params.wildcards[0]` instead of a regular glob pattern. This makes building individual CSS files more efficient.
+1. We've replaced `gulp.dest` with an asynchronous iteration calling `target.write`. This ensures that only the requested CSS files are written to the file system.
+2. In `gulp.src` we're using `target.wildcards[0]` instead of a regular glob pattern. This makes building individual CSS files more efficient.
 
 ### Remote sources
 
@@ -176,14 +176,14 @@ var got = require('got')
 
 var build = Build.dest('target')
 
-build.add('example.html', async function (params) {
+build.add('example.html', async function (target) {
   try {
     var res = await got('http://example.com')
-    if (res.statusCode === 410) await this.prune()
+    if (res.statusCode === 410) await target.prune()
     if (res.statusCode !== 200) return
 
-    await this.write({
-      path: params.target,
+    await target.write({
+      path: target.path,
       contents: res.body
     })
   } catch (err) {
@@ -194,7 +194,7 @@ build.add('example.html', async function (params) {
 cli(build)
 ```
 
-This example also shows why it's necessary to call `this.prune` manually. Here we first try to fetch the resource, and then only delete the old version if the server responds with the HTTP status "410 Gone". Then if the status code is anything else than 200, we don't write anything, leaving the old version in place. This makes our build process more resilient against downtime of external services, or just allows us to continue our work when offline.
+This example also shows why it's necessary to call `target.prune` manually. Here we first try to fetch the resource, and then only delete the old version if the server responds with the HTTP status "410 Gone". Then if the status code is anything else than 200, we don't write anything, leaving the old version in place. This makes our build process more resilient against downtime of external services, or just allows us to continue our work when offline.
 
 ### More examples
 

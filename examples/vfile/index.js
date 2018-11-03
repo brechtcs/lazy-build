@@ -12,10 +12,10 @@ var vfile = require('to-vfile')
 
 var build = Build.dest(path.join(__dirname, 'target'))
 
-build.add('*.html', async function (params) {
-  await this.prune()
+build.add('*.html', async function (target) {
+  await target.prune()
 
-  var page = params.wildcards[0]
+  var page = target.wildcards[0]
   var sources = fg.stream(path.join(__dirname, 'src', page + '.md'))
 
   for await (var source of sources) {
@@ -30,7 +30,7 @@ build.add('*.html', async function (params) {
       .use(stringify)
       .process(file)
 
-    await this.write(file)
+    await target.write(file)
   }
 })
 

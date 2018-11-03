@@ -48,16 +48,16 @@ test('make & clean', async function (t) {
     isPrune: true
   })
 
-  build.add('*.txt', async (params) => {
-    await this.prune()
+  build.add('*.txt', async (target) => {
+    await target.prune()
 
-    var name = params.wildcards[0]
+    var name = target.wildcards[0]
     var sources = await fg(path.join('src', name + '.txt'))
 
     var targets = sources.map(src => {
       var content = fs.readFileSync(src, 'utf8')
 
-      return this.write({
+      return target.write({
         path: path.basename(src),
         contents: content,
         enc: 'utf8'
