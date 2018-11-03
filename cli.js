@@ -11,7 +11,7 @@ module.exports = async function (build) {
   build.opts = {
     isAll: args.all || args.a,
     isPrune: args.prune || args.p,
-    noVerify: !args.verify
+    strictMode: args.strict
   }
 
   var clean = args.clean || args.c
@@ -22,7 +22,7 @@ module.exports = async function (build) {
     await build.make(patterns)
   } catch (err) {
     process.stderr.write(err.stack + '\n')
-    process.exit(1)
+    if (build.strictMode) process.exit(1)
   }
 }
 

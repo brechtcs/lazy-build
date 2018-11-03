@@ -1,3 +1,4 @@
+var box = require('callbox')
 var cp = require('child_process')
 var fs = require('fs')
 var http = require('http')
@@ -26,13 +27,13 @@ test('multiple example', async function (t) {
   var example = 'multiple'
 
   await clean(example)
-  code = await run(example, ['1.json'])
+  code = await run(example, ['--no-strict', '1.json'])
   t.strictEqual(code, 0)
   t.ok(exists(example, '1.json'))
   t.notOk(exists(example, '2.json'))
 
   await clean(example)
-  code = await run(example, ['examples/multiple/target/2.json'])
+  code = await run(example, ['--no-strict', 'examples/multiple/target/2.json'])
   t.strictEqual(code, 0)
   t.notOk(exists(example, '1.json'))
   t.ok(exists(example, '2.json'))
@@ -40,13 +41,13 @@ test('multiple example', async function (t) {
   await clean(example)
   write(example, 'dummy.json', '')
   t.ok(exists(example, 'dummy.json'))
-  code = await run(example, ['-pa'])
+  code = await run(example, ['--no-strict', '-pa'])
   t.strictEqual(code, 0)
   t.notOk(exists(example, 'dummy.json'))
   t.ok(exists(example, '1.json'))
   t.ok(exists(example, '2.json'))
 
-  code = await run(example, ['-c'])
+  code = await run(example, ['--no-strict', '-c'])
   t.strictEqual(code, 0)
   t.notOk(exists(example, '1.json'))
   t.notOk(exists(example, '2.json'))
@@ -122,17 +123,15 @@ test('gulp example', async function (t) {
  * Helpers
  */
 function clean (example) {
-  return new Promise((resolve, reject) => {
-    rm(`examples/${example}/target/**/*`, err => {
-      if (err) reject(err)
-      else resolve()
-    })
-  })
+  return box(done => rm(`examples/${example}/target/**/*`, done))
 }
 
 function run (example, flags) {
-  return new Promise(resolve => {
-    cp.fork('./examples/' + example, flags).on('close', resolve)
+  if (!flags.includes('--no-strict')) {
+    flags.push('--strict')
+  }
+  return box(done => {
+    cp.fork('./examples/' + example, flags).on('close', code => done(null, code))
   })
 }
 

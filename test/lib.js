@@ -1,4 +1,5 @@
 var Build = require('../')
+var errors = require('../lib/errors')
 var fg = require('fast-glob')
 var fs = require('fs')
 var mock = require('mock-fs')
@@ -92,8 +93,12 @@ test('make & clean', async function (t) {
 test('errors', async function (t) {
   mock()
 
-  var err
-  var build = Build.dest('target')
+  var build = Build.dest('target', {
+    isPrune: true,
+    strictMode: true
+  })
+
+  var err, pattern
   var fail = async function (target) {
     try {
       await build.make(target)
@@ -108,8 +113,46 @@ test('errors', async function (t) {
     fs.writeFileSync('target/other.png', Buffer.alloc(8))
   })
 
-  err = await fail('image.png')
+  pattern = 'image.png'
+  err = await fail(pattern)
   t.ok(err)
-  t.ok(err.message.includes('No files were generated for pattern'))
+  t.strictEqual(err.message, errors.noFiles(pattern))
+
+  // Created file doesn't match target
+  build.add('*.png', function (target) {
+    return target.write({
+      path: target.wildcards[0] + '.jpg',
+      contents: Buffer.alloc(8)
+    })
+  })
+
+  err = await fail(pattern)
+  t.ok(err)
+  t.strictEqual(err.message, errors.noMatch('target.write', 'image.jpg', pattern))
+
+  // Incorrect callback use for `target.prune`
+  build.add('image.png', function (target) {
+    target.prune(err => console.error(err))
+  })
+
+  err = await fail(pattern)
+  t.ok(err)
+  t.strictEqual(err.message, errors.useCallback(pattern))
+
+  // Incorrect callback use for `target.write`
+  build.add('image.png', function (target) {
+    var file = {
+      path: target.path,
+      contents: Buffer.alloc(8)
+    }
+
+    target.write(file, err => {
+      console.error(err)
+    })
+  })
+
+  err = await fail(pattern)
+  t.ok(err)
+  t.strictEqual(err.message, errors.useCallback(pattern))
   t.end()
 })
