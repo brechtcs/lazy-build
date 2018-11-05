@@ -1,3 +1,5 @@
+var assert = require('assert')
+var errors = require('./lib/errors')
 var minimist = require('minimist')
 
 module.exports = async function (build) {
@@ -14,10 +16,10 @@ module.exports = async function (build) {
     strictMode: args.strict
   }
 
-  var clean = args.clean || args.c
-  var patterns = getPatterns(build, args._)
-
   try {
+    var clean = args.clean || args.c
+    var patterns = getPatterns(build, args._)
+
     if (clean) await build.clean()
     await build.make(patterns)
   } catch (err) {
@@ -32,7 +34,17 @@ function getPatterns (build, patterns) {
   }
 
   return patterns.map(function (pattern) {
-    if (build.has(pattern)) return pattern
-    return build.resolve(pattern)
-  }).filter(pattern => pattern !== null)
+    if (build.has(pattern)) {
+      return pattern
+    }
+    return {
+      target: build.resolve(pattern),
+      pattern: pattern
+    }
+  }).filter(data => {
+    if (build.strictMode) {
+      assert.ok(data.target, errors.notFound(data.pattern))
+    }
+    return data.target !== null
+  }).map(data => data.target)
 }
