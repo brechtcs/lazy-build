@@ -1,7 +1,7 @@
 {
   "name": "lazy-build",
-  "version": "3.1.0",
-  "description": "A lazy build system using pull streams",
+  "version": "4.0.0",
+  "description": "A lazy build system using glob targets",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
   "scripts": {
@@ -43,8 +43,8 @@
     "lazy",
     "build",
     "globs",
-    "pull",
-    "streams",
+    "glob",
+    "targets",
     "make",
     "gulp"
   ],
