@@ -1,127 +1,326 @@
 # lazy-build
 
-A lazy build system, combining ideas from GNU Make and Gulp, using `pull-stream` in the engine room.
+A lazy build system that...
 
-## Usage
+- Follows the "code over configuration" approach introduced by Gulp.
+- Applies it to clearly defined build targets as with GNU Make.
+- Decides which files to build using simple glob patterns.
+
+## Getting started
+
+### Basic usage
+
+Let's first create a single file programmatically. This is a basic build configuration that does just that:
 
 ```js
 // build.js
 
 var Build = require('lazy-build')
-var marked = require('marked')
-var pull = require('lazy-build/pull')
-var transform = require('prop-transform')
+var cli = require('lazy-build/cli')
 
-var build = Build.dest('public')
+var build = Build.dest('target'))
 
-build.add('*.html', function html (params) {
-  var name = params[0]
-
-  return pull(
-    build.read(`src/${name}.md`, 'utf8'),
-    build.target(src => `${src.name}.html`),
-    pull.map(transform('contents', marked)),
-    build.write()
-  )
-})
-
-build.cli()
-```
-
-With this build script, the command `node build.js --all` will generate a html file in the `public` folder for all markdown files found in `src`. Running `node build.js new-post.html` will only convert `src/new-post.md`, if it exists. Using the `--clean` flag on either command will delete all generated files before rebuilding. Because of the way we define targets, files not recognized by Lazy Build will be left untouched.
-
-### Create files
-
-If you want to create files on the fly, without reading any corresponding source file on the system, just define plain objects with the properties `path`, `contents`, and if necessary `enc` for the encoding.
-
-```js
-build.add('dat.json', async function manifest () {
-  var manifest = {
-    url: 'dat://79f4eb8409172d6f1482044245c286e700af0c45437d191d99183743d0b91937/',
-    title: 'Site name',
-    description: 'Site description'
-  }
-
-  return build.write({
-    path: 'dat.json',
-    contents: JSON.stringify(manifest),
-    enc: 'utf8'
+build.add('test.json', function (target) {
+  return target.write({
+    path: target.path,
+    contents: JSON.stringify({
+      type: 'random',
+      data: true
+    })
   })
 })
+
+cli(build)
 ```
 
-### Paginate and concatenate
+If you now run `node build.js test.json` or `node build.js --all`, the requested file will be created at `target/test.json`.
 
-You can easily concatenate (or paginate) multiple files using the [`pull-group`](https://www.npmjs.com/package/pull-group) module and the file object model described in the previous section.
+### Multiple files
+
+You can also define a single target to build multiple files, using glob patterns. Here's an example:
 
 ```js
-var group = require('pull-group')
+// build.js
 
-build.add('index.html', function index () {
-  return pull(
-    build.read('test/src/*.md', 'utf8'),
-    pull.map(transform('contents', marked)),
-    group(Infinity),
-    pull.map(function (files) {
-      return {
-        path: 'index.html',
-        contents: files.map(file => file.contents).join('\n'),
-        enc: 'utf8'
-      }
-    }),
-    build.write()
-  )
+var Build = require('lazy-build')
+var cli = require('lazy-build/cli')
+
+var build = Build.dest('target'))
+
+build.add('*.json', async function (target) {
+  await target.prune()
+
+  var data = [
+    { dit: 32, dat: true },
+    { dit: 0, dat: true},
+    { dit: 501, dat: false}
+  ]
+
+  var targets = data.map((item, i) => {
+    var number = i + 1
+
+    return target.write({
+      path: number + '.json',
+      contents: JSON.stringify(item, null, 2)
+    })
+  })
+
+  return Promise.all(targets)
 })
+
+cli(build)
 ```
 
-### Await before streaming
+There's a couple of commands you can run now:
 
-It's also possible to await an asynchronous call before starting the stream. In that case you should wrap the steam using [`pull-resolve`](https://www.npmjs.com/package/pull-resolve) before returning it.
+- `node build.js --all` or `node build.js *.json` will create files for all three data points: `target/1.json`, `target/2.json`, and `target/3.json`.
+- You can (re)build any file separately too, for example `node build.js 2.json`. The other files will remain untouched.
+- `node build.js --clean` deletes all the files matching `target/*.json`. This can be combined with `--all` or another target to rebuild things from scratch.
+
+Now let's assume you change your dataset, removing the last item. This is where the `await target.prune()` call goes to work.
+
+- `node build.js --prune 3.json` will now delete the file `target/3.json`, because the corresponding data point wasn't found. The other files are left untouched.
+- `node build.js --prune *.json` on the other hand deletes `target/3.json`, and rebuilds `target/1.json` and `target/2.json` as well.
+
+### From the file system
+
+There is no builtin way to read files from `lazy-build`. Just using Node's `fs` module directly might suffice in a lot of cases. Sometimes you may need something more comprehensive though.
+
+#### Vfile
+
+One excellent option is to dive into the `vfile` ecosystem. [Vfiles](https://github.com/vfile/vfile) are supported in `lazy-build` as first class citizens, meaning they can be passed to `target.write` without adaption. This example uses `to-vfile` to read some markdown files and then transforms them to HTML using `unified` plugins:
 
 ```js
-var resolve = require('pull-resolve')
+var Build = require('lazy-build')
+var cli = require('lazy-build/cli')
+var doc = require('rehype-document')
+var fg = require('fast-glob')
+var format = require('rehype-format')
+var rehype = require('remark-rehype')
+var remark = require('remark-parse')
+var stringify = require('rehype-stringify')
+var unified = require('unified')
+var vfile = require('to-vfile')
 
-build.add('drafts/*.html', async function robots () {
-  var drafts = await cms.getDrafts()
+var build = Build.dest('target')
 
-  var stream = pull(
-    pull.values(drafts),
-    pull.map(draft => {
-      return {
-        path: `drafts/${draft.name}.html`,
-        contents: marked(draft.body),
-        enc: 'utf8'
-      }
-    }),
-    build.write()
-  )
+build.add('*.html', async function (target) {
+  await target.prune()
 
-  return resolve(stream)
+  var page = target.wildcards[0]
+  var sources = fg.stream(`src/${page}.md`)
+
+  for await (var source of sources) {
+    var file = await vfile.read(source)
+    file.dirname = ''
+    file.extname = '.html'
+    file = await unified()
+      .use(remark)
+      .use(rehype)
+      .use(doc)
+      .use(format)
+      .use(stringify)
+      .process(file)
+
+    await target.write(file)
+  }
 })
+
+cli(build)
 ```
 
+#### Gulp
 
-### Use Gulp plugins
-
-Most Gulp plugins can be used too, using the [`pull-vinyl`](https://www.npmjs.com/package/pull-vinyl) and [`stream-to-pull-stream`](https://www.npmjs.com/package/stream-to-pull-stream) modules.
+The same goes for the [Vinyl](https://github.com/gulpjs/vinyl) objects used by Gulp. They too can be handed to `target.write` without adaptation. This makes it possible to reuse Gulp workflows with only small adjustments. Take for example this typical Less-to-CSS pipeline:
 
 ```js
-var cssnano = require('cssnano')
-var postcss = require('gulp-postcss')
-var toPull = require('stream-to-pull-stream')
-var vinyl = require('pull-vinyl')
+var Build = require('lazy-build')
+var autoprefixer = require('gulp-autoprefixer')
+var cli = require('lazy-build/cli')
+var cssnano = require('gulp-cssnano')
+var less = require('gulp-less')
+var gulp = require('vinyl-fs')
 
-build.add('*.css', function styles (params) {
-  var plugins = [cssnano]
+var build = Build.dest('target')
 
-  return pull(
-    vinyl.src(`test/src/${params[0]}.css`),
-    toPull.duplex(postcss(plugins)),
-    build.target(src => src.base),
-    build.write()
-  )
+build.add('*.css', async function (target) {
+  await target.prune()
+
+  var name = target.wildcards[0]
+  var pipeline = gulp.src(`src/${name}.less`))
+    .pipe(less())
+    .pipe(autoprefixer())
+    .pipe(cssnano())
+
+  for await (var file of pipeline) {
+    await target.write(file)
+  }
 })
+
+cli(build)
 ```
+
+There's two main changes compared to a standard Gulp stream:
+
+1. We've replaced `gulp.dest` with an asynchronous iteration calling `target.write`. This ensures that only the requested CSS files are written to the file system.
+2. In `gulp.src` we're using `target.wildcards[0]` instead of a regular glob pattern. This makes building individual CSS files more efficient.
+
+### Remote sources
+
+Sometimes we might want to include some remote resources in our build. Content from a headless CMS for example, or data from a REST API. Here's a very basic example to get started:
+
+```js
+var Build = require('lazy-build')
+var cli = require('lazy-build/cli')
+var got = require('got')
+
+var build = Build.dest('target')
+
+build.add('example.html', async function (target) {
+  try {
+    var res = await got('http://example.com')
+    if (res.statusCode === 410) await target.prune()
+    if (res.statusCode !== 200) return
+
+    await target.write({
+      path: target.path,
+      contents: res.body
+    })
+  } catch (err) {
+    console.warn('Failed to fetch remote version of example.html')
+  }
+})
+
+cli(build)
+```
+
+This example also shows why it's necessary to call `target.prune` manually. Here we first try to fetch the resource, and then only delete the old version if the server responds with the HTTP status "410 Gone". Then if the status code is anything else than 200, we don't write anything, leaving the old version in place. This makes our build process more resilient against downtime of external services, or just allows us to continue our work when offline.
+
+### More examples
+
+All the examples above are available in the `examples` folder of this repository, as well as some other interesting use cases. If you have some alternative ideas of your own, PRs are always welcome!
+
+## API
+
+### var build = Build.dest(destination, options)
+
+Create a new `lazy-build` instance.
+
+#### destination
+
+Type: `string` (required)
+
+Path to folder where the build files should be written to.
+
+#### options.isAll
+
+Type: `boolean` (default: `false`)
+
+Determines whether all targets should be built on any run.
+
+#### options.isPrune
+
+Type: `boolean` (default: `false`)
+
+Determines whether old files for targets should be pruned before rebuilding.
+
+#### options.strictMode
+
+Type: `boolean` (default: `false`)
+
+Determines whether errors should be thrown on potential user errors.
+
+### build.add(path, handler [, options])
+
+Add a new handler for building file(s).
+
+#### path
+
+Type: `string` (required)
+
+Glob pattern matching the file(s) to be built by this handler.
+
+#### handler(target [, callback])
+
+Type: `function` (required)
+
+Method containing the logic to create the file(s) matching `path`.
+
+##### target.path
+
+Type: `string`
+
+The path originally passed into `build.add`.
+
+##### target.wildcards
+
+Type: `Array<string>`
+
+A list of values to resolve the wildcards in the `path` glob pattern.
+
+##### target.prune([callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in. Don't use callback unless `options.useCallback === true`. (see below)
+
+Method that prunes existing files matching the `path` glob.
+
+##### target.write(file, [callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in. Don't use callback unless `options.useCallback === true`. (see below)
+
+Method to write a file to the build destination folder. File can be an object of type `Vfile`, `Vinyl`, or just a literal with `path` and `contents` properties set.
+
+##### callback
+
+Type: `function` (optional)
+
+Only use if `options.useCallback === true`. (see below)
+
+#### options.useCallback
+
+Type: `boolean` (default: `false`)
+
+Determines whether callback usage is allowed in the handler function.
+
+### build.clean([callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in.
+
+Deletes all the files in the destination folder matching any of the build targets.
+
+### build.has(pattern)
+
+Type: `function`
+
+Returns `boolean` indicating if a build target is defined for `pattern`.
+
+### build.make(patterns [, callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in.
+
+Build all files matching the requested glob patterns.
+
+#### patterns
+
+Type: `Array<string>` or `string`
+
+Should be a (list of) glob pattern(s) matching the files to be built.
+
+### build.resolve(path)
+
+Type: `function`
+
+Returns `string` representing the path relative to the build destination folder for a given `path` from the local file system.
+
+Throws an error if the requested path is outside the destination folder.
 
 ## License
 
