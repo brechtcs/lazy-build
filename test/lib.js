@@ -39,7 +39,6 @@ test('add, has & resolve', async function (t) {
 
   t.strictEqual(build.resolve('test/target/*.txt'), '*.txt')
   t.strictEqual(build.resolve('test/target/any.txt'), 'any.txt')
-  t.notOk(build.resolve('test/target/any.md'))
 
   setTimeout(() => {
     t.strictEqual(read('.gitignore'), '*.txt\n')
@@ -160,6 +159,15 @@ test('errors', async function (t) {
   err = await fail(pattern)
   t.ok(err)
   t.strictEqual(err.message, errors.useCallback(pattern))
+
+  // Fail to resolve path outside of destination
+  try {
+    build.resolve(pattern)
+    t.notOk(true)
+  } catch (err) {
+    t.ok(err)
+    t.strictEqual(err.message, errors.outsideDest(pattern))
+  }
   t.end()
 
   await clean()

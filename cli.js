@@ -37,14 +37,11 @@ function getPatterns (build, patterns) {
     if (build.has(pattern)) {
       return pattern
     }
-    return {
-      target: build.resolve(pattern),
-      pattern: pattern
-    }
-  }).filter(data => {
+
+    var resolved = build.resolve(pattern)
     if (build.strictMode) {
-      assert.ok(data.target, errors.notFound(data.pattern))
+      assert.ok(build.has(resolved), errors.notFound(pattern))
     }
-    return data.target !== null
-  }).map(data => data.target)
+    return resolved
+  })
 }
