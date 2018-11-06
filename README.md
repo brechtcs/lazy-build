@@ -1,8 +1,8 @@
 # lazy-build
 
-A lazy build system.
+A lazy build system that...
 
-- Uses the "code over configuration" approach introduced by Gulp.
+- Follows the "code over configuration" approach introduced by Gulp.
 - Applies it to clearly defined build targets as with GNU Make.
 - Decides which files to build using simple glob patterns.
 
@@ -199,6 +199,128 @@ This example also shows why it's necessary to call `target.prune` manually. Here
 ### More examples
 
 All the examples above are available in the `examples` folder of this repository, as well as some other interesting use cases. If you have some alternative ideas of your own, PRs are always welcome!
+
+## API
+
+### var build = Build.dest(destination, options)
+
+Create a new `lazy-build` instance.
+
+#### destination
+
+Type: `string` (required)
+
+Path to folder where the build files should be written to.
+
+#### options.isAll
+
+Type: `boolean` (default: `false`)
+
+Determines whether all targets should be built on any run.
+
+#### options.isPrune
+
+Type: `boolean` (default: `false`)
+
+Determines whether old files for targets should be pruned before rebuilding.
+
+#### options.strictMode
+
+Type: `boolean` (default: `false`)
+
+Determines whether errors should be thrown on potential user errors.
+
+### build.add(path, handler [, options])
+
+Add a new handler for building file(s).
+
+#### path
+
+Type: `string` (required)
+
+Glob pattern matching the file(s) to be built by this handler.
+
+#### handler(target [, callback])
+
+Type: `function` (required)
+
+Method containing the logic to create the file(s) matching `path`.
+
+##### target.path
+
+Type: `string`
+
+The path originally passed into `build.add`.
+
+##### target.wildcards
+
+Type: `Array<string>`
+
+A list of values to resolve the wildcards in the `path` glob pattern.
+
+##### target.prune([callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in. Don't use callback unless `options.useCallback === true`. (see below)
+
+Method that prunes existing files matching the `path` glob.
+
+##### target.write(file, [callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in. Don't use callback unless `options.useCallback === true`. (see below)
+
+Method to write a file to the build destination folder. File can be an object of type `Vfile`, `Vinyl`, or just a literal with `path` and `contents` properties set.
+
+##### callback
+
+Type: `function` (optional)
+
+Only use if `options.useCallback === true`. (see below)
+
+#### options.useCallback
+
+Type: `boolean` (default: `false`)
+
+Determines whether callback usage is allowed in the handler function.
+
+### build.clean([callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in.
+
+Deletes all the files in the destination folder matching any of the build targets.
+
+### build.has(pattern)
+
+Type: `function`
+
+Returns `boolean` indicating if a build target is defined for `pattern`.
+
+### build.make(patterns [, callback])
+
+Type: `function`
+
+Returns `Promise` if no callback is passed in.
+
+Build all files matching the requested glob patterns.
+
+#### patterns
+
+Type: `Array<string>` or `string`
+
+Should be a (list of) glob pattern(s) matching the files to be built.
+
+### build.resolve(path)
+
+Type: `function`
+
+Returns `string` representing the path relative to the build destination folder for a given `path` from the local file system.
+
+Throws an error if the requested path is outside the destination folder.
 
 ## License
 
