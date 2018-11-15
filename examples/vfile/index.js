@@ -10,7 +10,7 @@ var stringify = require('rehype-stringify')
 var unified = require('unified')
 var vfile = require('to-vfile')
 
-var build = Build.dest(path.join(__dirname, 'target'))
+var build = new Build(path.join(__dirname, 'target'))
 
 build.add('*.html', async function (target) {
   await target.prune()

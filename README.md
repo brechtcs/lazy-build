@@ -18,7 +18,7 @@ Let's first create a single file programmatically. This is a basic build configu
 var Build = require('lazy-build')
 var cli = require('lazy-build/cli')
 
-var build = Build.dest('target'))
+var build = new Build('target'))
 
 build.add('test.json', function (target) {
   return target.write({
@@ -45,7 +45,7 @@ You can also define a single target to build multiple files, using glob patterns
 var Build = require('lazy-build')
 var cli = require('lazy-build/cli')
 
-var build = Build.dest('target'))
+var build = new Build('target'))
 
 build.add('*.json', async function (target) {
   await target.prune()
@@ -102,7 +102,7 @@ var stringify = require('rehype-stringify')
 var unified = require('unified')
 var vfile = require('to-vfile')
 
-var build = Build.dest('target')
+var build = new Build('target')
 
 build.add('*.html', async function (target) {
   await target.prune()
@@ -141,7 +141,7 @@ var cssnano = require('gulp-cssnano')
 var less = require('gulp-less')
 var gulp = require('vinyl-fs')
 
-var build = Build.dest('target')
+var build = new Build('target')
 
 build.add('*.css', async function (target) {
   await target.prune()
@@ -174,7 +174,7 @@ var Build = require('lazy-build')
 var cli = require('lazy-build/cli')
 var got = require('got')
 
-var build = Build.dest('target')
+var build = new Build('target')
 
 build.add('example.html', async function (target) {
   try {
@@ -202,7 +202,7 @@ All the examples above are available in the `examples` folder of this repository
 
 ## API
 
-### var build = Build.dest(destination, options)
+### var build = new Build(destination, options)
 
 Create a new `lazy-build` instance.
 

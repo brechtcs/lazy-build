@@ -3,7 +3,7 @@ var cli = require('../../cli')
 var got = require('got')
 var path = require('path')
 
-var build = Build.dest(path.join(__dirname, '/target'))
+var build = new Build(path.join(__dirname, '/target'))
 
 build.add('example.html', async function (target) {
   try {

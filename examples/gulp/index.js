@@ -6,7 +6,7 @@ var less = require('gulp-less')
 var gulp = require('vinyl-fs')
 var path = require('path')
 
-var build = Build.dest(path.join(__dirname, '/target'))
+var build = new Build(path.join(__dirname, '/target'))
 
 build.add('*.css', async function (target) {
   await target.prune()

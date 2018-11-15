@@ -2,7 +2,7 @@ var Build = require('../../')
 var cli = require('../../cli')
 var path = require('path')
 
-var build = Build.dest(path.join(__dirname, 'target'))
+var build = new Build(path.join(__dirname, 'target'))
 
 build.add('*.json', async function (target) {
   await target.prune()

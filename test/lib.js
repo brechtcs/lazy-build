@@ -26,7 +26,7 @@ function write (file, contents) {
 test('add, has & resolve', async function (t) {
   await clean()
 
-  var build = Build.dest('test/target')
+  var build = new Build('test/target')
   build.add('*.txt', function () {})
 
   t.ok(build.targets['*.txt'].fn)
@@ -50,7 +50,7 @@ test('make & clean', async function (t) {
   await clean()
   write('leftover.txt', '')
 
-  var build = Build.dest('test/target', {
+  var build = new Build('test/target', {
     isPrune: true
   })
 
@@ -98,7 +98,7 @@ test('make & clean', async function (t) {
 test('errors', async function (t) {
   await clean()
 
-  var build = Build.dest('test/target', {
+  var build = new Build('test/target', {
     isPrune: true,
     strictMode: true
   })
