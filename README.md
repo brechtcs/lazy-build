@@ -5,6 +5,7 @@ A lazy build system that...
 - Follows the "code over configuration" approach introduced by Gulp.
 - Applies it to clearly defined build targets as with GNU Make.
 - Decides which files to build using simple glob patterns.
+- Supports virtual file systems, like [`DatArchive`](https://beakerbrowser.com/docs/apis/dat) or [`hyperdrive`](https://github.com/mafintosh/hyperdrive).
 
 ## Getting started
 
@@ -208,9 +209,13 @@ Create a new `lazy-build` instance.
 
 #### destination
 
-Type: `string` (required)
+Type: `string` or `object` (required)
 
-Path to folder where the build files should be written to.
+Destination folder for the build files.
+
+If a path string is passed in, it will be used to create a `scoped-fs` instance.
+
+If an object is used, it should implement all asynchronous `fs` methods, like for example `dat-node` or `hyperdrive`.
 
 #### options.isAll
 
