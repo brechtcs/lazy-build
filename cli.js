@@ -10,11 +10,11 @@ module.exports = async function (build) {
     }
   })
 
-  build.opts = {
+  build.config({
     isAll: args.all || args.a,
     isPrune: args.prune || args.p,
     strictMode: args.strict
-  }
+  })
 
   try {
     var clean = args.clean || args.c

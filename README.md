@@ -305,6 +305,12 @@ Type: `function`
 
 Returns `boolean` indicating if a build target is defined for `pattern`.
 
+### build.config(opts)
+
+Type: `function`
+
+Sets build options (see constructor).
+
 ### build.make(patterns [, callback])
 
 Type: `function`
