@@ -1,5 +1,4 @@
-var Build = require('../../')
-var cli = require('../../cli')
+var Build = require('../../cli')
 var browserify = require('browserify')
 var path = require('path')
 
@@ -14,4 +13,4 @@ build.add('app.js', function (target) {
   })
 })
 
-cli(build)
+build.make()

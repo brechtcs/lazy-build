@@ -1,5 +1,4 @@
-var Build = require('../../')
-var cli = require('../../cli')
+var Build = require('../../cli')
 var got = require('got')
 var path = require('path')
 
@@ -20,4 +19,4 @@ build.add('example.html', async function (target) {
   }
 })
 
-cli(build)
+build.make()

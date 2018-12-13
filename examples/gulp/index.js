@@ -1,6 +1,5 @@
-var Build = require('../../')
+var Build = require('../../cli')
 var autoprefixer = require('gulp-autoprefixer')
-var cli = require('../../cli')
 var cssnano = require('gulp-cssnano')
 var less = require('gulp-less')
 var gulp = require('vinyl-fs')
@@ -22,4 +21,4 @@ build.add('*.css', async function (target) {
   }
 })
 
-cli(build)
+build.make()

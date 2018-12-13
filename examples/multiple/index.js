@@ -1,5 +1,4 @@
-var Build = require('../../')
-var cli = require('../../cli')
+var Build = require('../../cli')
 var path = require('path')
 
 var build = new Build(path.join(__dirname, 'target'))
@@ -25,4 +24,4 @@ build.add('*.json', async function (target) {
   return Promise.all(targets)
 })
 
-cli(build)
+build.make()

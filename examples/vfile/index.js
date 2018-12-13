@@ -1,5 +1,4 @@
-var Build = require('../../')
-var cli = require('../../cli')
+var Build = require('../../cli')
 var doc = require('rehype-document')
 var fg = require('fast-glob')
 var format = require('rehype-format')
@@ -34,4 +33,4 @@ build.add('*.html', async function (target) {
   }
 })
 
-cli(build)
+build.make()

@@ -1,5 +1,4 @@
-var Build = require('../../')
-var cli = require('../../cli')
+var Build = require('../../cli')
 var fs = require('fs')
 var path = require('path')
 
@@ -13,4 +12,4 @@ build.add('callback.txt', function (target, done) {
   fs.writeFile(path.join(build.dir, target.path), 'callback test', 'utf8', done)
 }, { useCallback: true })
 
-cli(build)
+build.make()

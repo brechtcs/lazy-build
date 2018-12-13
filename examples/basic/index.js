@@ -1,5 +1,4 @@
-var Build = require('../../')
-var cli = require('../../cli')
+var Build = require('../../cli')
 var path = require('path')
 
 var build = new Build(path.join(__dirname, '/target'))
@@ -14,4 +13,4 @@ build.add('test.json', function (target) {
   })
 })
 
-cli(build)
+build.make()
