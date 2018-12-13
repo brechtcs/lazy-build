@@ -84,7 +84,7 @@ test('make & clean', async function (t) {
   t.ok(exists('second.txt'))
   t.strictEqual(read('second.txt'), 'second\n')
 
-  await build.make('*.txt')
+  await build.make()
   t.notOk(exists('leftover.txt'))
   t.ok(exists('first.txt'))
   t.ok(exists('second.txt'))
