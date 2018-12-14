@@ -12,7 +12,7 @@ test('basic example', async function (t) {
 
   await clean(example)
 
-  code = await run(example, ['-a'])
+  code = await run(example)
   t.strictEqual(code, 0)
   t.ok(exists(example, 'test.json'))
 
@@ -60,19 +60,19 @@ test('remote example', async function (t) {
 
   await clean(example)
 
-  code = await run(example, ['-ap'])
+  code = await run(example, ['-p'])
   t.strictEqual(code, 1)
   t.notOk(exists(example, 'example.html'))
 
   var content = '<body>example</body>'
   var server = serve(content, 57455)
 
-  code = await run(example, ['-ap'])
+  code = await run(example, ['-p'])
   t.strictEqual(code, 0)
   t.ok(exists(example, 'example.html'))
 
   server.close(async () => {
-    code = await run(example, ['-ap'])
+    code = await run(example, ['-p'])
     t.strictEqual(code, 0)
     t.ok(exists(example, 'example.html'))
     t.strictEqual(read(example, 'example.html'), content)
@@ -86,7 +86,7 @@ test('browserify example', async function (t) {
 
   await clean(example)
 
-  code = await run(example, ['-a'])
+  code = await run(example)
   t.strictEqual(code, 0)
   t.ok(exists(example, 'app.js'))
   t.end()
@@ -98,7 +98,7 @@ test('vfile example', async function (t) {
 
   await clean(example)
 
-  code = await run(example, ['-a'])
+  code = await run(example)
   t.strictEqual(code, 0)
   t.ok(exists(example, 'about.html'))
   t.ok(exists(example, 'contact.html'))
@@ -112,7 +112,7 @@ test('gulp example', async function (t) {
 
   await clean(example)
 
-  code = await run(example, ['-a'])
+  code = await run(example)
   t.strictEqual(code, 0)
   t.ok(exists(example, 'main.css'))
   t.ok(exists(example, 'theme.css'))
@@ -127,6 +127,7 @@ function clean (example) {
 }
 
 function run (example, flags) {
+  if (!flags) flags = []
   if (!flags.includes('--no-strict')) {
     flags.push('--strict')
   }

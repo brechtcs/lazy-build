@@ -8,7 +8,6 @@ class BuildCLI extends Build {
     super(dest, opts)
 
     this.config({
-      isAll: this.args.all || this.args.a,
       isPrune: this.args.prune || this.args.p,
       strictMode: this.args.strict
     })
@@ -16,11 +15,11 @@ class BuildCLI extends Build {
 
   async make () {
     try {
-      var clean = this.args.clean || this.args.c
-      var patterns = getPatterns(this, this.args._)
-
-      if (clean) await this.clean()
-      await super.make(patterns)
+      if (this.args.clean || this.args.c) {
+        await this.clean()
+      } else {
+        await super.make(getPatterns(this))
+      }
     } catch (err) {
       process.stderr.write(err.stack + '\n')
       if (this.strictMode) process.exit(1)
@@ -37,9 +36,11 @@ class BuildCLI extends Build {
   }
 }
 
-function getPatterns (build, patterns) {
-  if (build.isAll) {
-    return Object.keys(build.targets)
+function getPatterns (build) {
+  var patterns = build.args._
+
+  if (!patterns.length) {
+    return undefined
   }
 
   return patterns.map(function (pattern) {
