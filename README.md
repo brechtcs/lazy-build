@@ -33,7 +33,7 @@ build.add('test.json', function (target) {
 build.make()
 ```
 
-If you now run `node build.js test.json` or `node build.js --all`, the requested file will be created at `target/test.json`.
+If you now run `node build.js test.json`, the requested file will be created at `target/test.json`.
 
 ### Multiple files
 
@@ -72,9 +72,9 @@ build.make()
 
 There's a couple of commands you can run now:
 
-- `node build.js --all` or `node build.js *.json` will create files for all three data points: `target/1.json`, `target/2.json`, and `target/3.json`.
+- `node build.js *.json` (or just `node build.js`, which makes all targets) will create files for all three data points: `target/1.json`, `target/2.json`, and `target/3.json`.
 - You can (re)build any file separately too, for example `node build.js 2.json`. The other files will remain untouched.
-- `node build.js --clean` deletes all the files matching `target/*.json`. This can be combined with `--all` or another target to rebuild things from scratch.
+- `node build.js --clean` deletes all the files matching `target/*.json`.
 
 Now let's assume you change your dataset, removing the last item. This is where the `await target.prune()` call goes to work.
 
