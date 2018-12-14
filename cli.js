@@ -15,10 +15,12 @@ class BuildCLI extends Build {
 
   async make () {
     try {
+      var patterns = getPatterns(this)
+
       if (this.args.clean || this.args.c) {
-        await this.clean()
+        await this.clean(patterns)
       } else {
-        await super.make(getPatterns(this))
+        await super.make(patterns)
       }
     } catch (err) {
       process.stderr.write(err.stack + '\n')
