@@ -212,11 +212,6 @@ If a path string is passed in, it will be used to create a `scoped-fs` instance.
 
 If an object is used, it should implement all asynchronous `fs` methods, like for example `dat-node` or `hyperdrive`.
 
-#### options.isAll
-
-Type: `boolean` (default: `false`)
-
-Determines whether all targets should be built on any run.
 
 #### options.isPrune
 
