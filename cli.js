@@ -6,11 +6,7 @@ var minimist = require('minimist')
 class BuildCLI extends Build {
   constructor (dest, opts) {
     super(dest, opts)
-
-    this.config({
-      isPrune: this.args.prune || this.args.p,
-      strictMode: this.args.strict
-    })
+    this.config(this.args)
   }
 
   async make () {
@@ -24,7 +20,7 @@ class BuildCLI extends Build {
       }
     } catch (err) {
       process.stderr.write(err.stack + '\n')
-      if (this.strictMode) process.exit(1)
+      if (this.strict) process.exit(1)
     }
   }
 

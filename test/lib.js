@@ -51,7 +51,7 @@ test('make & clean', async function (t) {
   write('leftover.txt', '')
 
   var build = new Build('test/target', {
-    isPrune: true
+    prune: true
   })
 
   build.add('*.txt', async (target) => {
@@ -113,8 +113,8 @@ test('errors', async function (t) {
   await clean()
 
   var build = new Build('test/target', {
-    isPrune: true,
-    strictMode: true
+    prune: true,
+    strict: true
   })
 
   var err, pattern
