@@ -26,7 +26,7 @@ function write (file, contents) {
 test('add, has & resolve', async function (t) {
   await clean()
 
-  var build = Build.dest('test/target')
+  var build = new Build('test/target')
   build.add('*.txt', function () {})
 
   t.ok(build.targets['*.txt'].fn)
@@ -50,8 +50,8 @@ test('make & clean', async function (t) {
   await clean()
   write('leftover.txt', '')
 
-  var build = Build.dest('test/target', {
-    isPrune: true
+  var build = new Build('test/target', {
+    prune: true
   })
 
   build.add('*.txt', async (target) => {
@@ -73,6 +73,13 @@ test('make & clean', async function (t) {
     return Promise.all(targets)
   })
 
+  build.add('empty.txt', function (target) {
+    return target.write({
+      path: target.path,
+      contents: ''
+    })
+  })
+
   await build.make('first.txt')
   t.ok(exists('leftover.txt'))
   t.ok(exists('first.txt'))
@@ -84,23 +91,30 @@ test('make & clean', async function (t) {
   t.ok(exists('second.txt'))
   t.strictEqual(read('second.txt'), 'second\n')
 
-  await build.make('*.txt')
+  await build.clean('second.txt')
+  t.ok(exists('leftover.txt'))
+  t.ok(exists('first.txt'))
+  t.notOk(exists('second.txt'))
+
+  await build.make()
   t.notOk(exists('leftover.txt'))
   t.ok(exists('first.txt'))
   t.ok(exists('second.txt'))
+  t.ok(exists('empty.txt'))
 
   await build.clean()
   t.notOk(exists('first.txt'))
   t.notOk(exists('second.txt'))
+  t.notOk(exists('empty.txt'))
   t.end()
 })
 
 test('errors', async function (t) {
   await clean()
 
-  var build = Build.dest('test/target', {
-    isPrune: true,
-    strictMode: true
+  var build = new Build('test/target', {
+    prune: true,
+    strict: true
   })
 
   var err, pattern

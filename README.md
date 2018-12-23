@@ -5,6 +5,7 @@ A lazy build system that...
 - Follows the "code over configuration" approach introduced by Gulp.
 - Applies it to clearly defined build targets as with GNU Make.
 - Decides which files to build using simple glob patterns.
+- Supports virtual file systems, like [`DatArchive`](https://beakerbrowser.com/docs/apis/dat) or [`hyperdrive`](https://github.com/mafintosh/hyperdrive).
 
 ## Getting started
 
@@ -15,10 +16,9 @@ Let's first create a single file programmatically. This is a basic build configu
 ```js
 // build.js
 
-var Build = require('lazy-build')
-var cli = require('lazy-build/cli')
+var Build = require('lazy-build/cli')
 
-var build = Build.dest('target'))
+var build = new Build('target'))
 
 build.add('test.json', function (target) {
   return target.write({
@@ -30,10 +30,10 @@ build.add('test.json', function (target) {
   })
 })
 
-cli(build)
+build.make()
 ```
 
-If you now run `node build.js test.json` or `node build.js --all`, the requested file will be created at `target/test.json`.
+If you now run `node build.js test.json`, the requested file will be created at `target/test.json`.
 
 ### Multiple files
 
@@ -42,10 +42,9 @@ You can also define a single target to build multiple files, using glob patterns
 ```js
 // build.js
 
-var Build = require('lazy-build')
-var cli = require('lazy-build/cli')
+var Build = require('lazy-build/cli')
 
-var build = Build.dest('target'))
+var build = new Build('target'))
 
 build.add('*.json', async function (target) {
   await target.prune()
@@ -68,14 +67,14 @@ build.add('*.json', async function (target) {
   return Promise.all(targets)
 })
 
-cli(build)
+build.make()
 ```
 
 There's a couple of commands you can run now:
 
-- `node build.js --all` or `node build.js *.json` will create files for all three data points: `target/1.json`, `target/2.json`, and `target/3.json`.
+- `node build.js *.json` (or just `node build.js`, which makes all targets) will create files for all three data points: `target/1.json`, `target/2.json`, and `target/3.json`.
 - You can (re)build any file separately too, for example `node build.js 2.json`. The other files will remain untouched.
-- `node build.js --clean` deletes all the files matching `target/*.json`. This can be combined with `--all` or another target to rebuild things from scratch.
+- `node build.js --clean` deletes all the files matching `target/*.json`.
 
 Now let's assume you change your dataset, removing the last item. This is where the `await target.prune()` call goes to work.
 
@@ -91,8 +90,7 @@ There is no builtin way to read files from `lazy-build`. Just using Node's `fs` 
 One excellent option is to dive into the `vfile` ecosystem. [Vfiles](https://github.com/vfile/vfile) are supported in `lazy-build` as first class citizens, meaning they can be passed to `target.write` without adaption. This example uses `to-vfile` to read some markdown files and then transforms them to HTML using `unified` plugins:
 
 ```js
-var Build = require('lazy-build')
-var cli = require('lazy-build/cli')
+var Build = require('lazy-build/cli')
 var doc = require('rehype-document')
 var fg = require('fast-glob')
 var format = require('rehype-format')
@@ -102,7 +100,7 @@ var stringify = require('rehype-stringify')
 var unified = require('unified')
 var vfile = require('to-vfile')
 
-var build = Build.dest('target')
+var build = new Build('target')
 
 build.add('*.html', async function (target) {
   await target.prune()
@@ -126,7 +124,7 @@ build.add('*.html', async function (target) {
   }
 })
 
-cli(build)
+build.make()
 ```
 
 #### Gulp
@@ -134,14 +132,13 @@ cli(build)
 The same goes for the [Vinyl](https://github.com/gulpjs/vinyl) objects used by Gulp. They too can be handed to `target.write` without adaptation. This makes it possible to reuse Gulp workflows with only small adjustments. Take for example this typical Less-to-CSS pipeline:
 
 ```js
-var Build = require('lazy-build')
+var Build = require('lazy-build/cli')
 var autoprefixer = require('gulp-autoprefixer')
-var cli = require('lazy-build/cli')
 var cssnano = require('gulp-cssnano')
 var less = require('gulp-less')
 var gulp = require('vinyl-fs')
 
-var build = Build.dest('target')
+var build = new Build('target')
 
 build.add('*.css', async function (target) {
   await target.prune()
@@ -157,7 +154,7 @@ build.add('*.css', async function (target) {
   }
 })
 
-cli(build)
+build.make()
 ```
 
 There's two main changes compared to a standard Gulp stream:
@@ -170,11 +167,10 @@ There's two main changes compared to a standard Gulp stream:
 Sometimes we might want to include some remote resources in our build. Content from a headless CMS for example, or data from a REST API. Here's a very basic example to get started:
 
 ```js
-var Build = require('lazy-build')
-var cli = require('lazy-build/cli')
+var Build  require('lazy-build/cli')
 var got = require('got')
 
-var build = Build.dest('target')
+var build = new Build('target')
 
 build.add('example.html', async function (target) {
   try {
@@ -191,7 +187,7 @@ build.add('example.html', async function (target) {
   }
 })
 
-cli(build)
+build.make()
 ```
 
 This example also shows why it's necessary to call `target.prune` manually. Here we first try to fetch the resource, and then only delete the old version if the server responds with the HTTP status "410 Gone". Then if the status code is anything else than 200, we don't write anything, leaving the old version in place. This makes our build process more resilient against downtime of external services, or just allows us to continue our work when offline.
@@ -202,21 +198,20 @@ All the examples above are available in the `examples` folder of this repository
 
 ## API
 
-### var build = Build.dest(destination, options)
+### var build = new Build(destination, options)
 
 Create a new `lazy-build` instance.
 
 #### destination
 
-Type: `string` (required)
+Type: `string` or `object` (required)
 
-Path to folder where the build files should be written to.
+Destination folder for the build files.
 
-#### options.isAll
+If a path string is passed in, it will be used to create a `scoped-fs` instance.
 
-Type: `boolean` (default: `false`)
+If an object is used, it should implement all asynchronous `fs` methods, like for example `dat-node` or `hyperdrive`.
 
-Determines whether all targets should be built on any run.
 
 #### options.isPrune
 
@@ -299,6 +294,12 @@ Deletes all the files in the destination folder matching any of the build target
 Type: `function`
 
 Returns `boolean` indicating if a build target is defined for `pattern`.
+
+### build.config(opts)
+
+Type: `function`
+
+Sets build options (see constructor).
 
 ### build.make(patterns [, callback])
 

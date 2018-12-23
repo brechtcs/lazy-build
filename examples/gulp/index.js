@@ -1,12 +1,11 @@
-var Build = require('../../')
+var Build = require('../../cli')
 var autoprefixer = require('gulp-autoprefixer')
-var cli = require('../../cli')
 var cssnano = require('gulp-cssnano')
 var less = require('gulp-less')
 var gulp = require('vinyl-fs')
 var path = require('path')
 
-var build = Build.dest(path.join(__dirname, '/target'))
+var build = new Build(path.join(__dirname, '/target'))
 
 build.add('*.css', async function (target) {
   await target.prune()
@@ -22,4 +21,4 @@ build.add('*.css', async function (target) {
   }
 })
 
-cli(build)
+build.make()

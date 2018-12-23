@@ -1,36 +1,44 @@
+var Build = require('./')
 var assert = require('assert')
 var errors = require('./lib/errors')
 var minimist = require('minimist')
 
-module.exports = async function (build) {
-  var args = minimist(process.argv.slice(2), {
-    boolean: true,
-    default: {
-      verify: true
-    }
-  })
-
-  build.opts = {
-    isAll: args.all || args.a,
-    isPrune: args.prune || args.p,
-    strictMode: args.strict
+class BuildCLI extends Build {
+  constructor (dest, opts) {
+    super(dest, opts)
+    this.config(this.args)
   }
 
-  try {
-    var clean = args.clean || args.c
-    var patterns = getPatterns(build, args._)
+  async make () {
+    try {
+      var patterns = getPatterns(this)
 
-    if (clean) await build.clean()
-    await build.make(patterns)
-  } catch (err) {
-    process.stderr.write(err.stack + '\n')
-    if (build.strictMode) process.exit(1)
+      if (this.args.clean || this.args.c) {
+        await this.clean(patterns)
+      } else {
+        await super.make(patterns)
+      }
+    } catch (err) {
+      process.stderr.write(err.stack + '\n')
+      if (this.strict) process.exit(1)
+    }
+  }
+
+  get args () {
+    return minimist(process.argv.slice(2), {
+      boolean: true,
+      default: {
+        verify: true
+      }
+    })
   }
 }
 
-function getPatterns (build, patterns) {
-  if (build.isAll) {
-    return Object.keys(build.targets)
+function getPatterns (build) {
+  var patterns = build.args._
+
+  if (!patterns.length) {
+    return undefined
   }
 
   return patterns.map(function (pattern) {
@@ -45,3 +53,5 @@ function getPatterns (build, patterns) {
     return resolved
   })
 }
+
+module.exports = BuildCLI

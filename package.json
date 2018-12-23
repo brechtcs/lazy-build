@@ -1,6 +1,6 @@
 {
   "name": "lazy-build",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "A lazy build system using glob targets",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",
@@ -10,17 +10,18 @@
   "dependencies": {
     "call-me-maybe": "^1.0.1",
     "callbox": "^1.0.0",
-    "delete-empty": "^2.0.0",
-    "fast-glob": "^2.2.3",
+    "dat-glob": "^1.1.0",
+    "dat-rm": "^1.1.1",
     "micromatch": "^3.1.10",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "pump": "^3.0.0",
-    "rimraf": "^2.6.2",
-    "run-parallel": "^1.1.9"
+    "run-parallel": "^1.1.9",
+    "scoped-fs": "^1.2.0"
   },
   "devDependencies": {
     "browserify": "^16.2.3",
+    "fast-glob": "^2.2.3",
     "got": "^9.2.2",
     "gulp-autoprefixer": "^6.0.0",
     "gulp-cssnano": "^2.1.3",

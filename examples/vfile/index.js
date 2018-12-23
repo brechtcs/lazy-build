@@ -1,5 +1,4 @@
-var Build = require('../../')
-var cli = require('../../cli')
+var Build = require('../../cli')
 var doc = require('rehype-document')
 var fg = require('fast-glob')
 var format = require('rehype-format')
@@ -10,7 +9,7 @@ var stringify = require('rehype-stringify')
 var unified = require('unified')
 var vfile = require('to-vfile')
 
-var build = Build.dest(path.join(__dirname, 'target'))
+var build = new Build(path.join(__dirname, 'target'))
 
 build.add('*.html', async function (target) {
   await target.prune()
@@ -34,4 +33,4 @@ build.add('*.html', async function (target) {
   }
 })
 
-cli(build)
+build.make()
