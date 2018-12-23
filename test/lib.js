@@ -73,6 +73,13 @@ test('make & clean', async function (t) {
     return Promise.all(targets)
   })
 
+  build.add('empty.txt', function (target) {
+    return target.write({
+      path: target.path,
+      contents: ''
+    })
+  })
+
   await build.make('first.txt')
   t.ok(exists('leftover.txt'))
   t.ok(exists('first.txt'))
@@ -93,10 +100,12 @@ test('make & clean', async function (t) {
   t.notOk(exists('leftover.txt'))
   t.ok(exists('first.txt'))
   t.ok(exists('second.txt'))
+  t.ok(exists('empty.txt'))
 
   await build.clean()
   t.notOk(exists('first.txt'))
   t.notOk(exists('second.txt'))
+  t.notOk(exists('empty.txt'))
   t.end()
 })
 
