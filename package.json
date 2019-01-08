@@ -1,6 +1,6 @@
 {
   "name": "lazy-build",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "A lazy build system using glob targets",
   "author": "Brecht Savelkoul <brecht.savelkoul@gmail.com>",
   "main": "index.js",

@@ -106,7 +106,13 @@ test('make & clean', async function (t) {
   t.notOk(exists('first.txt'))
   t.notOk(exists('second.txt'))
   t.notOk(exists('empty.txt'))
-  t.end()
+
+  build.dest.readdir('', (err, files) => {
+    files.forEach(file => {
+      t.strictEqual(file, '.gitignore', file)
+    })
+    t.end()
+  })
 })
 
 test('errors', async function (t) {
